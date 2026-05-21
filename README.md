@@ -80,22 +80,6 @@ En la raíz de cada módulo que lo requiera, hay un archivo `.env`.
 
 ---
 
-## 🔀 Convención de Ramas
-
-Para mantener la trazabilidad de los desarrollos individuales de cara al porcentaje de aporte grupal, el esquema de ramificación se gestionará de la siguiente manera:
-
-```text
-main         →  🚀 Producción
-└── develop  →  🧪 Integración
-     ├── feature/daniel      →  💻 Desarrollos e infraestructura de Daniel
-     ├── feature/mapa     →  💻 Desarrollos de Mapa
-     ├── feature/katheryn    →  💻 Desarrollos de Katheryn
-     └── feature/juan          →  💻 Desarrollos de Juan
-
-```
-
----
-
 ## 👥 Integrantes del Grupo y Topología de Red
 
 Las IPs fijas asignadas para la distribución de los servicios del ecosistema SPS son:
@@ -104,10 +88,10 @@ Las IPs fijas asignadas para la distribución de los servicios del ecosistema SP
 
  |
 | --- | --- | --- |
-| **Daniel Castro** | `10.43.100.122` | `Balanceador`, `SPS-SPA`, `MS-Compra` |
-| **Mapa Rodríguez** | `10.43.101.18` | `MS-Auth-Catalogo`, `Bases de Datos Relacionales` |
-| **Katheryn Guasca** | `10.43.99.121` | `SaludPay-Back`, `SaludPay-SPA` |
-| **Juan Rozo** | `10.43.100.111` | `MOM (Brokers)`, `SAM`, `SHC` |
+| **Daniel Castro** | `10.43.100.122` | `Balanceador`, `SNS`, `MS-Auth-Catalogo`, `Email` |
+| **Mapa Rodríguez** | `10.43.101.18` | `SPS-SPA`, `SaludPay-Back`, `SaludPay-SPA` |
+| **Katheryn Guasca** | `10.43.99.121` | `MS-Compra (Réplicas)`, `SAM`, `SHC` |
+| **Juan Rozo** | `10.43.100.111` | `MS-Compra (Maestro)`, `Cola-SAM`, `Cola-SHC`, `Cola-Pago` |
 
 ---
 
