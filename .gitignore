@@ -1,0 +1,134 @@
+# ===========================
+# JAVA / SPRING BOOT
+# ===========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# ===========================
+# .NET / C#
+# ===========================
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+.vs/
+*.ncrunch*
+*.[Rr]esharper
+*.DotSettings.user
+publish/
+PublishProfiles/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+packages/
+*.nupkg
+*.snupkg
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# ===========================
+# ANGULAR / NODE
+# ===========================
+node_modules/
+dist/
+.angular/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# ===========================
+# IDEs
+# ===========================
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===========================
+# DOCKER
+# ===========================
+.docker/
+
+# ===========================
+# VARIABLES DE ENTORNO
+# ===========================
+.env
+.env.*
+!.env.example
+application-local.properties
+application-local.yml
+
+# ===========================
+# LOGS
+# ===========================
+logs/
+*.log
+spring.log
