@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "email.from",
+      "type": "java.lang.String",
+      "description": "Direccion de correo remitente."
+    },
+    {
+      "name": "email.salud-pay-url",
+      "type": "java.lang.String",
+      "description": "URL base del portal SaludPay para incluir en el correo."
+    },
+    {
+      "name": "email.sps-url-pago",
+      "type": "java.lang.String",
+      "description": "URL de pago SPS para incluir en el correo de aprobacion SNS."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Compra Completada — SPS</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;">
+    <h2 style="color: #1565C0;">Confirmacion de compra</h2>
+    <p>Hola <strong th:text="${nombreCliente}">Cliente</strong>,</p>
+    <p>Su pago fue recibido y su compra en SPS ha sido completada exitosamente.</p>
+    <ul>
+        <li><strong>Número de compra:</strong> <span th:text="${numeroCompra}"></span></li>
+        <li><strong>Valor pagado:</strong> $<span th:text="${#numbers.formatDecimal(valorCompra, 1, 'COMMA', 2, 'POINT')}"></span></li>
+    </ul>
+    <p>Pronto recibira informacion sobre sus servicios de salud contratados.</p>
+    <p style="color:#888;font-size:12px;">Este es un correo automático, por favor no responda.</p>
+</body>
+</html>
