@@ -1,0 +1,32 @@
+{
+  "properties": [
+    {
+      "name": "balanceador.backends",
+      "type": "java.util.List<java.lang.String>",
+      "description": "URLs base de los backends de MS-Compra."
+    },
+    {
+      "name": "balanceador.healthcheck.interval-ms",
+      "type": "java.lang.Long",
+      "description": "Intervalo en milisegundos entre ciclos de health-check.",
+      "defaultValue": 15000
+    },
+    {
+      "name": "sns.base-url",
+      "type": "java.lang.String",
+      "description": "URL base de la SNS (Superintendencia Nacional de Salud)."
+    },
+    {
+      "name": "sns.timeout-ms",
+      "type": "java.lang.Long",
+      "description": "Timeout en milisegundos para llamadas a la SNS.",
+      "defaultValue": 5000
+    },
+    {
+      "name": "sns.max-retries",
+      "type": "java.lang.Integer",
+      "description": "Numero maximo de reintentos hacia la SNS.",
+      "defaultValue": 3
+    }
+  ]
+}

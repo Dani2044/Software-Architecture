@@ -1,0 +1,46 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: sps-balanceador
+  profiles:
+    active: production
+  webflux:
+    base-path: /
+  datasource:
+    url: jdbc:h2:mem:balanceador-db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+balanceador:
+  backends:
+    - http://10.43.100.111:8082
+    - http://10.43.99.121:8082
+    - http://10.43.99.121:8083
+  healthcheck:
+    interval-ms: 15000
+
+sns:
+  base-url: http://10.43.100.122:8090
+  timeout-ms: 5000
+  max-retries: 3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    "[co.sps.balanceador]": INFO
+    "[org.springframework.web.reactive]": WARN
