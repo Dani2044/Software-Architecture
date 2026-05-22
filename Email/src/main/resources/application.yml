@@ -7,14 +7,15 @@ spring:
   profiles:
     active: production
   datasource:
-    url: jdbc:h2:mem:email-db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:mysql://10.43.101.18:3306/sps_email?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: sps_user
+    password: sps_pass_CAMBIAR
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: 587

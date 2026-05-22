@@ -1,4 +1,4 @@
-package co.sps.balanceador;
+package co.sps.balanceador.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

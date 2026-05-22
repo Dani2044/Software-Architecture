@@ -1,10 +1,12 @@
-package co.sps.balanceador;
+package co.sps.balanceador.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import co.sps.balanceador.config.BalanceadorProperties;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
@@ -19,10 +21,14 @@ public class LoadBalancerLogic {
     private final BalanceadorProperties props;
     private final AtomicInteger counter = new AtomicInteger(0);
     private final WebClient.Builder webClientBuilder;
+    private final LogService logService;
 
-    public LoadBalancerLogic(BalanceadorProperties props, WebClient.Builder webClientBuilder) {
+    public LoadBalancerLogic(BalanceadorProperties props,
+                              WebClient.Builder webClientBuilder,
+                              LogService logService) {
         this.props = props;
         this.webClientBuilder = webClientBuilder;
+        this.logService = logService;
     }
 
     public String nextBackend() {
@@ -36,19 +42,30 @@ public class LoadBalancerLogic {
         return Mono.defer(() -> {
             String base = nextBackend();
             log.info("Forwarding GET {} -> {}{}", path, base, path);
+            logService.registrar("REQUEST", "GET", base, path, "Solicitud enviada");
+
             return webClientBuilder.baseUrl(base).build()
                     .get()
                     .uri(path)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .timeout(Duration.ofSeconds(10));
+                    .timeout(Duration.ofSeconds(10))
+                    .doOnSuccess(body ->
+                        logService.registrar("RESPONSE", "GET", base, path, "Respuesta exitosa")
+                    )
+                    .doOnError(error ->
+                        logService.registrar("ERROR", "GET", base, path, error.getMessage())
+                    );
         })
         .retryWhen(
             Retry.max(props.getBackends().size() - 1)
                  .filter(ex -> ex instanceof WebClientResponseException
-                             || ex instanceof java.util.concurrent.TimeoutException)
-                 .doBeforeRetry(sig ->
-                     log.warn("Reintentando tras error: {}", sig.failure().getMessage()))
+                         || ex instanceof java.util.concurrent.TimeoutException)
+                 .doBeforeRetry(sig -> {
+                     log.warn("Reintentando tras error: {}", sig.failure().getMessage());
+                     logService.registrar("RETRY", "GET", "N/A", path,
+                             "Reintento #" + sig.totalRetries() + " — " + sig.failure().getMessage());
+                 })
         );
     }
 
@@ -56,18 +73,31 @@ public class LoadBalancerLogic {
         return Mono.defer(() -> {
             String base = nextBackend();
             log.info("Forwarding POST {} -> {}{}", path, base, path);
+            logService.registrar("REQUEST", "POST", base, path, "Solicitud enviada");
+
             return webClientBuilder.baseUrl(base).build()
                     .post()
                     .uri(path)
                     .bodyValue(body)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .timeout(Duration.ofSeconds(30));
+                    .timeout(Duration.ofSeconds(30))
+                    .doOnSuccess(res ->
+                        logService.registrar("RESPONSE", "POST", base, path, "Respuesta exitosa")
+                    )
+                    .doOnError(error ->
+                        logService.registrar("ERROR", "POST", base, path, error.getMessage())
+                    );
         })
         .retryWhen(
             Retry.max(props.getBackends().size() - 1)
                  .filter(ex -> ex instanceof WebClientResponseException
-                             || ex instanceof java.util.concurrent.TimeoutException)
+                         || ex instanceof java.util.concurrent.TimeoutException)
+                 .doBeforeRetry(sig -> {
+                     log.warn("Reintentando tras error: {}", sig.failure().getMessage());
+                     logService.registrar("RETRY", "POST", "N/A", path,
+                             "Reintento #" + sig.totalRetries() + " — " + sig.failure().getMessage());
+                 })
         );
     }
 }

@@ -1,4 +1,4 @@
-package co.sps.balanceador;
+package co.sps.balanceador.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,9 +1,11 @@
-package co.sps.balanceador;
+package co.sps.balanceador.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import co.sps.balanceador.service.HealthCheck;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

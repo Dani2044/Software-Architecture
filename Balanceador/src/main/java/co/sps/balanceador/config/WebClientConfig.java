@@ -1,4 +1,4 @@
-package co.sps.balanceador;
+package co.sps.balanceador.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
