@@ -1,7 +1,7 @@
 package com.sps.compra.service;
 
 import com.sps.compra.entity.EstadoCompra;
-import com.sps.compra.repository.CompraRepository;
+import com.sps.compra.repository.RepoCompra;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,16 +15,16 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SnsPollingScheduler {
+public class TimerSNS {
 
-    private final CompraRepository compraRepository;
-    private final CompraService compraService;
+    private final RepoCompra repoCompra;
+    private final SrvCompras srvCompras;
 
     @Scheduled(fixedDelayString = "${sns.polling-ms:15000}")
     public void reintentar() {
-        var pendientes = compraRepository.findByEstado(EstadoCompra.EN_VALIDACION_SNS);
+        var pendientes = repoCompra.findByEstado(EstadoCompra.EN_VALIDACION_SNS);
         if (pendientes.isEmpty()) return;
         log.info("Reintentando validacion SNS para {} compra(s)", pendientes.size());
-        pendientes.forEach(c -> compraService.validarConSnsAsync(c.getId()));
+        pendientes.forEach(c -> srvCompras.validarConSnsAsync(c.getId()));
     }
 }

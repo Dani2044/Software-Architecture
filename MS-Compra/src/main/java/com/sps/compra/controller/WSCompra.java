@@ -2,8 +2,8 @@ package com.sps.compra.controller;
 
 import com.sps.compra.dto.CrearCompraRequest;
 import com.sps.compra.entity.Compra;
-import com.sps.compra.repository.CompraRepository;
-import com.sps.compra.service.CompraService;
+import com.sps.compra.repository.RepoCompra;
+import com.sps.compra.service.SrvCompras;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +15,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/compra")
 @RequiredArgsConstructor
-public class CompraController {
+public class WSCompra {
 
-    private final CompraService compraService;
-    private final CompraRepository compraRepository;
+    private final SrvCompras srvCompras;
+    private final RepoCompra repoCompra;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> crear(@Valid @RequestBody CrearCompraRequest req) {
-        Compra c = compraService.crearCompra(req);
+        Compra c = srvCompras.crearCompra(req);
         // 202 ACCEPTED: el cliente no espera respuesta inmediata (PDF/DOCX seccion 1.c)
         return ResponseEntity.accepted().body(Map.of(
                 "numeroCompra", c.getId(),
@@ -33,12 +33,12 @@ public class CompraController {
 
     @GetMapping("/{id}")
     public Compra detalle(@PathVariable Long id) {
-        return compraRepository.findById(id).orElseThrow();
+        return repoCompra.findById(id).orElseThrow();
     }
 
     @GetMapping("/cedula/{cedula}")
     public List<Compra> porCedula(@PathVariable String cedula) {
-        return compraRepository.findByCedulaCliente(cedula);
+        return repoCompra.findByCedulaCliente(cedula);
     }
 
     @GetMapping("/health")

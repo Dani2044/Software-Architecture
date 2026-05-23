@@ -1,6 +1,6 @@
 package com.sps.compra.entity;
 
-public enum EstadoValidacionSns {
+public enum ValidacionSNS {
     ENPROCESO,
     APROBADO,
     RECHAZADO

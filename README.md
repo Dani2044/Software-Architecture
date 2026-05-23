@@ -162,7 +162,7 @@ Las tres son **colas point-to-point** (no tópicos): cada mensaje lo procesa exa
 - **Persistencia:** `delivery-mode: persistent` (sobreviven a reinicios del broker).
 - **Idempotencia:** los consumidores SAM/SHC chequean `(numeroCompra, código)` antes de insertar; MS-Compra ignora pagos para compras ya `TERMINADA`.
 - **DLQ:** ActiveMQ mueve a `ActiveMQ.DLQ` automáticamente tras 6 reintentos.
-- **Conversor:** Jackson JSON con header `_type` para resolver el POJO destino (el cliente .NET publica con `_type=com.sps.compra.messaging.PagoEvento`).
+- **Conversor:** Jackson JSON con header `_type` para resolver el POJO destino (el cliente .NET publica con `_type=com.sps.compra.messaging.TransaccionPago`).
 
 ---
 

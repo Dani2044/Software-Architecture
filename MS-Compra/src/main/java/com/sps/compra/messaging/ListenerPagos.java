@@ -1,6 +1,6 @@
 package com.sps.compra.messaging;
 
-import com.sps.compra.service.CompraService;
+import com.sps.compra.service.SrvCompras;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class PagoListener {
+public class ListenerPagos {
 
-    private final CompraService compraService;
+    private final SrvCompras srvCompras;
 
     @JmsListener(destination = "${sps.cola.pago:ColaPagoConfirmado}")
-    public void onPago(PagoEvento evento) {
+    public void onPago(TransaccionPago evento) {
         log.info("[ColaPagoConfirmado] Pago recibido compra={} valor={}",
                 evento.getNumeroCompra(), evento.getValorPagado());
-        compraService.marcarComoPagada(evento.getNumeroCompra(), evento.getValorPagado());
+        srvCompras.marcarComoPagada(evento.getNumeroCompra(), evento.getValorPagado());
     }
 }

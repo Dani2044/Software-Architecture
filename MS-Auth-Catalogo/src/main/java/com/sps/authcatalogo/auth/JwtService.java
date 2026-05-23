@@ -21,7 +21,7 @@ import java.util.Map;
  * <p>La clave secreta y el tiempo de expiracion se configuran mediante las
  * propiedades {@code jwt.secret} y {@code jwt.expiration-ms} respectivamente.</p>
  *
- * @see AuthController#login(AuthController.LoginRequest)
+ * @see SrvAuth#login(String, String)
  */
 @Service
 public class JwtService {

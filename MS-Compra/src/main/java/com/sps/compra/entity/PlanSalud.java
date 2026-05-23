@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompraPlan {
+public class PlanSalud {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +39,10 @@ public class CompraPlan {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 32)
-    private EstadoValidacionSns estadoSns;
+    private ValidacionSNS estadoSns;
 
     @ElementCollection
     @CollectionTable(name = "compra_plan_servicio", joinColumns = @JoinColumn(name = "compra_plan_id"))
     @Builder.Default
-    private List<ServicioMedicoVo> servicios = new ArrayList<>();
+    private List<ServicioMedico> servicios = new ArrayList<>();
 }

@@ -44,7 +44,7 @@ public class Compra {
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
-    private List<CompraPlan> planes = new ArrayList<>();
+    private List<PlanSalud> planes = new ArrayList<>();
 
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;

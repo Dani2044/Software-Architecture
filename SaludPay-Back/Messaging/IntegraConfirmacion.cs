@@ -54,7 +54,7 @@ public class IntegraConfirmacion : IPagoPublisher
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             }));
             // Header que Spring Jackson usa para resolver el POJO destino
-            msg.Properties.SetString("_type", "com.sps.compra.messaging.PagoEvento");
+            msg.Properties.SetString("_type", "com.sps.compra.messaging.TransaccionPago");
             producer.Send(msg);
 
             _log.LogInformation("Publicado en {cola} pago de compra {n}", _cola, pago.NumeroCompra);

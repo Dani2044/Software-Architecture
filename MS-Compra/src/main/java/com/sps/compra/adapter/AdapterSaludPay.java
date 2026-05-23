@@ -1,4 +1,4 @@
-package com.sps.compra.client;
+package com.sps.compra.adapter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,14 +11,13 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 /**
- * Cliente REST hacia SaludPay-Back (.NET).
- * Cuando SNS aprueba, MS-Compra publica la compra pendiente en SaludPay para que
- * el cliente pueda pagarla en la SPA de SaludPay.
+ * Adapter HTTP hacia SaludPay-Back (.NET).
+ * Encapsula las llamadas WebClient REST.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SaludPayClient {
+public class AdapterSaludPay {
 
     private final WebClient.Builder webClientBuilder;
 

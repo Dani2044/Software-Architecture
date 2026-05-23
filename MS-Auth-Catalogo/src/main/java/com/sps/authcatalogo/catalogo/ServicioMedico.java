@@ -15,8 +15,8 @@ import java.math.BigDecimal;
  * un precio individual y una duracion estimada en minutos. Los servicios
  * se asocian a uno o mas {@link PlanSalud} mediante una relacion ManyToMany.</p>
  *
- * @see Plan
- * @see CatalogoController#servicios()
+ * @see PlanSalud
+ * @see SrvCatalogo#listarServicios()
  */
 @Entity
 @Table(name = "servicio_medico")

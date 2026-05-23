@@ -1,14 +1,12 @@
 package com.sps.compra.service;
 
-import com.sps.compra.client.EmailClient;
-import com.sps.compra.client.SaludPayClient;
-import com.sps.compra.client.SnsClient;
 import com.sps.compra.dto.CrearCompraRequest;
 import com.sps.compra.entity.*;
-import com.sps.compra.messaging.CompraEventPublisher;
 import com.sps.compra.messaging.CompraTerminadaSamEvento;
 import com.sps.compra.messaging.CompraTerminadaShcEvento;
-import com.sps.compra.repository.CompraRepository;
+import com.sps.compra.messaging.IntegraSAM;
+import com.sps.compra.messaging.IntegraSHC;
+import com.sps.compra.repository.RepoCompra;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,13 +18,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CompraService {
+public class SrvCompras {
 
-    private final CompraRepository compraRepository;
-    private final SnsClient snsClient;
-    private final EmailClient emailClient;
-    private final SaludPayClient saludPayClient;
-    private final CompraEventPublisher eventPublisher;
+    private final RepoCompra repoCompra;
+    private final SrvSNS srvSNS;
+    private final SrvEmail srvEmail;
+    private final SrvSaludPay srvSaludPay;
+    private final IntegraSAM integraSAM;
+    private final IntegraSHC integraSHC;
 
     /**
      * Paso 1 del enunciado: persiste la compra y responde 202 al cliente.
@@ -43,16 +42,16 @@ public class CompraService {
                 .build();
 
         req.getPlanes().forEach(p -> {
-            CompraPlan plan = CompraPlan.builder()
+            PlanSalud plan = PlanSalud.builder()
                     .compra(compra)
                     .codigoPlan(p.getCodigo())
                     .nombrePlan(p.getNombre())
                     .precio(p.getPrecio() != null ? p.getPrecio() : BigDecimal.ZERO)
-                    .estadoSns(EstadoValidacionSns.ENPROCESO)
+                    .estadoSns(ValidacionSNS.ENPROCESO)
                     .build();
             if (p.getServicios() != null) {
                 p.getServicios().forEach(s -> plan.getServicios().add(
-                        ServicioMedicoVo.builder()
+                        ServicioMedico.builder()
                                 .codigo(s.getCodigo())
                                 .nombre(s.getNombre())
                                 .duracionMinutos(s.getDuracionMinutos())
@@ -61,7 +60,7 @@ public class CompraService {
             compra.getPlanes().add(plan);
         });
 
-        Compra guardada = compraRepository.save(compra);
+        Compra guardada = repoCompra.save(compra);
         log.info("Compra creada id={} cedula={} total={}",
                 guardada.getId(), guardada.getCedulaCliente(), guardada.getValorTotal());
 
@@ -80,59 +79,59 @@ public class CompraService {
     /**
      * Recorre los planes y consulta la SNS. Si todos APROBADOS -> marca APROBADA y notifica
      * por correo + SaludPay. Si alguno RECHAZADO -> RECHAZADA. Si alguno ENPROCESO -> se queda
-     * en EN_VALIDACION_SNS y el SnsPollingScheduler la reintentara mas tarde.
+     * en EN_VALIDACION_SNS y el TimerSNS la reintentara mas tarde.
      */
     @Transactional
     public void validarConSnsAsync(Long compraId) {
-        Compra compra = compraRepository.findById(compraId).orElse(null);
+        Compra compra = repoCompra.findById(compraId).orElse(null);
         if (compra == null) return;
 
         compra.setEstado(EstadoCompra.EN_VALIDACION_SNS);
-        compraRepository.save(compra);
+        repoCompra.save(compra);
 
         boolean algunoEnProceso = false;
         boolean algunoRechazado = false;
 
-        for (CompraPlan plan : compra.getPlanes()) {
-            if (plan.getEstadoSns() == EstadoValidacionSns.APROBADO) continue;
-            EstadoValidacionSns resp = snsClient.validarPlan(plan.getCodigoPlan())
-                    .onErrorReturn(EstadoValidacionSns.ENPROCESO)
+        for (PlanSalud plan : compra.getPlanes()) {
+            if (plan.getEstadoSns() == ValidacionSNS.APROBADO) continue;
+            ValidacionSNS resp = srvSNS.validarAfiliado(plan.getCodigoPlan())
+                    .onErrorReturn(ValidacionSNS.ENPROCESO)
                     .block();
             plan.setEstadoSns(resp);
-            if (resp == EstadoValidacionSns.RECHAZADO) algunoRechazado = true;
-            if (resp == EstadoValidacionSns.ENPROCESO) algunoEnProceso = true;
+            if (resp == ValidacionSNS.RECHAZADO) algunoRechazado = true;
+            if (resp == ValidacionSNS.ENPROCESO) algunoEnProceso = true;
         }
 
         if (algunoRechazado) {
             compra.setEstado(EstadoCompra.RECHAZADA);
             compra.setObservacionSns("Uno o mas planes fueron rechazados por la SNS");
-            compraRepository.save(compra);
+            repoCompra.save(compra);
             log.info("Compra {} RECHAZADA por SNS", compra.getId());
             return;
         }
         if (algunoEnProceso) {
             log.info("Compra {} queda en EN_VALIDACION_SNS, se reintentara", compra.getId());
-            compraRepository.save(compra);
+            repoCompra.save(compra);
             return;
         }
 
         // Todos APROBADOS
         compra.setEstado(EstadoCompra.APROBADA);
-        compraRepository.save(compra);
+        repoCompra.save(compra);
         log.info("Compra {} APROBADA por SNS", compra.getId());
 
-        emailClient.enviarCorreoAprobacion(
+        srvEmail.enviarCorreoAprobacion(
                 compra.getCorreoCliente(), compra.getId(), compra.getValorTotal());
-        saludPayClient.publicarCompraPendiente(
+        srvSaludPay.publicarCompraPendiente(
                 compra.getCedulaCliente(), compra.getId(), compra.getValorTotal());
     }
 
     /**
-     * Llamado por PagoListener cuando llega un mensaje en ColaPagoConfirmado.
+     * Llamado por ListenerPagos cuando llega un mensaje en ColaPagoConfirmado.
      */
     @Transactional
     public void marcarComoPagada(Long numeroCompra, BigDecimal valorPagado) {
-        Compra compra = compraRepository.findById(numeroCompra).orElse(null);
+        Compra compra = repoCompra.findById(numeroCompra).orElse(null);
         if (compra == null) {
             log.warn("Pago recibido para compra inexistente {}", numeroCompra);
             return;
@@ -144,16 +143,16 @@ public class CompraService {
             return;
         }
         compra.setEstado(EstadoCompra.PAGADA);
-        compraRepository.save(compra);
+        repoCompra.save(compra);
 
         // Notificar SAM y SHC via MOM, marcar TERMINADA y avisar al correo
-        eventPublisher.notificarSam(buildEventoSam(compra));
-        eventPublisher.notificarShc(buildEventoShc(compra));
+        integraSAM.publicar(buildEventoSam(compra));
+        integraSHC.publicar(buildEventoShc(compra));
 
         compra.setEstado(EstadoCompra.TERMINADA);
-        compraRepository.save(compra);
+        repoCompra.save(compra);
 
-        emailClient.enviarCorreoCompraTerminada(compra.getCorreoCliente(), compra.getId());
+        srvEmail.enviarCorreoCompraTerminada(compra.getCorreoCliente(), compra.getId());
         log.info("Compra {} TERMINADA tras pago", compra.getId());
     }
 

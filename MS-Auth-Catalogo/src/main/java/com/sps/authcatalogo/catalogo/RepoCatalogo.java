@@ -11,7 +11,7 @@ import java.util.Optional;
  * para buscar planes por su codigo de negocio, utilizado en el endpoint
  * {@code GET /api/catalogo/planes/{codigo}}.</p>
  *
- * @see CatalogoController
+ * @see SrvCatalogo
  */
 public interface RepoCatalogo extends JpaRepository<PlanSalud, Long> {
 

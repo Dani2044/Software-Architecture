@@ -11,7 +11,7 @@ import java.util.Optional;
  * y un metodo de consulta derivado para buscar usuarios por nombre de usuario,
  * utilizado durante el flujo de autenticacion (login y registro).</p>
  *
- * @see AuthController
+ * @see SrvAuth
  */
 public interface RepoAuth extends JpaRepository<Usuario, Long> {
 

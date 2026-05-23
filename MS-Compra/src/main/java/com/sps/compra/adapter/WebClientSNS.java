@@ -1,6 +1,6 @@
-package com.sps.compra.client;
+package com.sps.compra.adapter;
 
-import com.sps.compra.entity.EstadoValidacionSns;
+import com.sps.compra.entity.ValidacionSNS;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,14 +12,13 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * Cliente asincrono no bloqueante hacia la SNS.
- * El enunciado exige asincronia SIN MOM, asi que usamos WebClient + Mono.
- * Ante ENPROCESO, MS-Compra reagenda la validacion con @Scheduled (ver SnsPollingScheduler).
+ * Adapter HTTP asincrono hacia la SNS.
+ * Encapsula las llamadas WebClient REST.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SnsClient {
+public class WebClientSNS {
 
     private final WebClient.Builder webClientBuilder;
 
@@ -32,7 +31,7 @@ public class SnsClient {
     @Value("${sns.timeout-ms:5000}")
     private long timeoutMs;
 
-    public Mono<EstadoValidacionSns> validarPlan(String codigoPlan) {
+    public Mono<ValidacionSNS> validarPlan(String codigoPlan) {
         return webClientBuilder.baseUrl(snsBaseUrl).build()
                 .get()
                 .uri(uri -> uri.path("/api/sns/validar")
@@ -44,17 +43,17 @@ public class SnsClient {
                 .timeout(Duration.ofMillis(timeoutMs))
                 .map(body -> {
                     Object estado = body.get("estado");
-                    if (estado == null) return EstadoValidacionSns.ENPROCESO;
+                    if (estado == null) return ValidacionSNS.ENPROCESO;
                     return switch (estado.toString().toUpperCase()) {
-                        case "APROBADO" -> EstadoValidacionSns.APROBADO;
-                        case "RECHAZADO" -> EstadoValidacionSns.RECHAZADO;
-                        default -> EstadoValidacionSns.ENPROCESO;
+                        case "APROBADO" -> ValidacionSNS.APROBADO;
+                        case "RECHAZADO" -> ValidacionSNS.RECHAZADO;
+                        default -> ValidacionSNS.ENPROCESO;
                     };
                 })
                 .onErrorResume(ex -> {
                     log.warn("SNS no disponible para plan {}: {} -> reintentar luego",
                             codigoPlan, ex.getMessage());
-                    return Mono.just(EstadoValidacionSns.ENPROCESO);
+                    return Mono.just(ValidacionSNS.ENPROCESO);
                 });
     }
 }
