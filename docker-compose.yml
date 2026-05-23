@@ -1,56 +1,294 @@
+# ============================================================================
+# SPS - Sistema de Compra de Planes de Salud
+# Arquitectura de Software 2026-10 - Pontificia Universidad Javeriana
+#
+# USO: cada integrante levanta su perfil:
+#   Juan    (10.43.100.111): COMPOSE_PROFILES=juan   docker compose up -d --build
+#   Daniel  (10.43.100.122): COMPOSE_PROFILES=daniel docker compose up -d --build
+#   Kath    (10.43.99.121):  COMPOSE_PROFILES=kath   docker compose up -d --build
+#   Mapa    (10.43.101.18):  COMPOSE_PROFILES=mapa   docker compose up -d --build
+#
+# Variables sensibles en .env (copiar de .env.example y completar).
+# ============================================================================
+
 services:
 
-  mysql-auth:
-    image: mysql:8.0
-    container_name: mysql-auth
+  # ==========================================================================
+  # PERFIL JUAN (10.43.100.111) - MS-Compra Maestro + Broker ActiveMQ
+  # ==========================================================================
+  activemq:
+    image: apache/activemq-classic:latest
+    container_name: activemq
+    profiles: ["juan"]
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASS}
-      MYSQL_DATABASE: sps_auth_db
+      ACTIVEMQ_CONNECTION_USER: ${ACTIVEMQ_USER}
+      ACTIVEMQ_CONNECTION_PASSWORD: ${ACTIVEMQ_PASS}
     ports:
-      - "3307:3306"
+      - "61616:61616"   # JMS
+      - "8161:8161"     # Consola web admin
+    restart: unless-stopped
 
   mysql-compra:
     image: mysql:8.0
     container_name: mysql-compra
+    profiles: ["juan", "kath"]
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: sps_compra_db
     ports:
       - "3308:3306"
+    volumes:
+      - mysql_compra_data:/var/lib/mysql
+    restart: unless-stopped
 
+  ms-compra:
+    build: ./MS-Compra
+    container_name: ms-compra
+    profiles: ["juan", "kath"]
+    depends_on:
+      - mysql-compra
+    environment:
+      DB_HOST: mysql-compra
+      DB_PASS: ${DB_PASS}
+      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
+      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
+      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
+      SNS_URL: ${SNS_URL}
+      SNS_CODIGO: ${SNS_CODIGO}
+      SALUD_PAY_URL: ${SALUD_PAY_URL}
+      EMAIL_URL: http://10.43.100.122:8084
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  # ==========================================================================
+  # PERFIL DANIEL (10.43.100.122) - Balanceador, SNS, Auth+Catalogo, Email
+  # ==========================================================================
+  mysql-auth:
+    image: mysql:8.0
+    container_name: mysql-auth
+    profiles: ["daniel"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: sps_auth_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_auth_data:/var/lib/mysql
+    restart: unless-stopped
+
+  mysql-sns:
+    image: mysql:8.0
+    container_name: mysql-sns
+    profiles: ["daniel"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: sps_sns_db
+    ports:
+      - "3311:3306"
+    volumes:
+      - mysql_sns_data:/var/lib/mysql
+    restart: unless-stopped
+
+  mysql-email:
+    image: mysql:8.0
+    container_name: mysql-email
+    profiles: ["daniel"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: sps_email_db
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql_email_data:/var/lib/mysql
+    restart: unless-stopped
+
+  mysql-balanceador:
+    image: mysql:8.0
+    container_name: mysql-balanceador
+    profiles: ["daniel"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: sps_balanceador_db
+    ports:
+      - "3313:3306"
+    volumes:
+      - mysql_balanceador_data:/var/lib/mysql
+    restart: unless-stopped
+
+  balanceador:
+    build: ./Balanceador
+    container_name: balanceador
+    profiles: ["daniel"]
+    depends_on:
+      - mysql-balanceador
+    environment:
+      DB_PASS: ${DB_PASS}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  sns:
+    build: ./SNS
+    container_name: sns
+    profiles: ["daniel"]
+    depends_on:
+      - mysql-sns
+    environment:
+      DB_HOST: mysql-sns
+      DB_PASS: ${DB_PASS}
+    ports:
+      - "8090:8090"
+    restart: unless-stopped
+
+  ms-auth-catalogo:
+    build: ./MS-Auth-Catalogo
+    container_name: ms-auth-catalogo
+    profiles: ["daniel"]
+    depends_on:
+      - mysql-auth
+    environment:
+      DB_HOST: mysql-auth
+      DB_PASS: ${DB_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+
+  email:
+    build: ./Email
+    container_name: email
+    profiles: ["daniel"]
+    depends_on:
+      - mysql-email
+    environment:
+      DB_HOST: mysql-email
+      DB_PASS: ${DB_PASS}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+    ports:
+      - "8084:8084"
+    restart: unless-stopped
+
+  # ==========================================================================
+  # PERFIL KATH (10.43.99.121) - MS-Compra Replica, SAM, SHC
+  # ==========================================================================
   mysql-sam:
     image: mysql:8.0
     container_name: mysql-sam
+    profiles: ["kath"]
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: sps_sam_db
     ports:
       - "3309:3306"
+    volumes:
+      - mysql_sam_data:/var/lib/mysql
+    restart: unless-stopped
 
   mysql-shc:
     image: mysql:8.0
     container_name: mysql-shc
+    profiles: ["kath"]
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: sps_shc_db
     ports:
       - "3310:3306"
+    volumes:
+      - mysql_shc_data:/var/lib/mysql
+    restart: unless-stopped
 
+  sam:
+    build: ./SAM
+    container_name: sam
+    profiles: ["kath"]
+    depends_on:
+      - mysql-sam
+    environment:
+      DB_HOST: mysql-sam
+      DB_PASS: ${DB_PASS}
+      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
+      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
+      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
+    ports:
+      - "8086:8086"
+    restart: unless-stopped
+
+  shc:
+    build: ./SHC
+    container_name: shc
+    profiles: ["kath"]
+    depends_on:
+      - mysql-shc
+    environment:
+      DB_HOST: mysql-shc
+      DB_PASS: ${DB_PASS}
+      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
+      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
+      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
+    ports:
+      - "8087:8087"
+    restart: unless-stopped
+
+  # ==========================================================================
+  # PERFIL MAPA (10.43.101.18) - SaludPay (.NET + SPA) + SPS-SPA
+  # NOTA: el enunciado pide .NET en Kestrel "fuera de IDE". Si Mapa prefiere
+  # correrlo dockerizado, este perfil lo construye; si no, puede lanzar
+  # SaludPay-Back con `dotnet run` directamente.
+  # ==========================================================================
   sqlserver-saludpay:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver-saludpay
+    profiles: ["mapa"]
     environment:
       SA_PASSWORD: ${SQLSERVER_PASS}
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    restart: unless-stopped
 
-  activemq:
-    image: apache/activemq-classic:latest
-    container_name: activemq
+  saludpay-back:
+    build: ./SaludPay-Back
+    container_name: saludpay-back
+    profiles: ["mapa"]
+    depends_on:
+      - sqlserver-saludpay
     environment:
-      ACTIVEMQ_ADMIN_LOGIN: ${ACTIVEMQ_USER}
-      ACTIVEMQ_ADMIN_PASSWORD: ${ACTIVEMQ_PASS}
+      DB_HOST: sqlserver-saludpay
+      DB_PASS: ${SQLSERVER_PASS}
+      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
+      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
+      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
     ports:
-      - "61616:61616"
-      - "8161:8161"
+      - "5000:5000"
+    restart: unless-stopped
+
+  saludpay-spa:
+    build: ./SaludPay-SPA
+    container_name: saludpay-spa
+    profiles: ["mapa"]
+    ports:
+      - "4201:80"
+    restart: unless-stopped
+
+  sps-spa:
+    build: ./SPS-SPA
+    container_name: sps-spa
+    profiles: ["mapa"]
+    ports:
+      - "4200:80"
+    restart: unless-stopped
+
+volumes:
+  mysql_auth_data:
+  mysql_compra_data:
+  mysql_sam_data:
+  mysql_shc_data:
+  mysql_sns_data:
+  mysql_email_data:
+  mysql_balanceador_data:
+  sqlserver_data:
