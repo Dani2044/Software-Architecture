@@ -1,7 +1,7 @@
 package com.sps.sam.listener;
 
 import com.sps.sam.dto.CompraTerminadaSamDto;
-import com.sps.sam.service.AgendaService;
+import com.sps.sam.service.SrvSAM;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -15,21 +15,21 @@ import org.springframework.stereotype.Component;
  * publica un mensaje en la cola. Este listener lo recibe, lo deserializa
  * automaticamente a {@link CompraTerminadaSamDto} (gracias al convertidor
  * Jackson configurado en {@link com.sps.sam.config.JmsConfig}) y delega
- * el procesamiento al servicio de negocio {@link com.sps.sam.service.AgendaService}.</p>
+ * el procesamiento al servicio de negocio {@link com.sps.sam.service.SrvSAM}.</p>
  *
  * <p>El nombre de la cola se configura mediante la propiedad
  * {@code sps.ColaSAM} (por defecto: {@code ColaSAM}).</p>
  *
  * @author SPS Team
- * @see com.sps.sam.service.AgendaService
+ * @see com.sps.sam.service.SrvSAM
  * @see com.sps.sam.config.JmsConfig
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SamListener {
+public class ListenerSAM {
 
-    private final AgendaService agendaService;
+    private final SrvSAM agendaService;
 
     /**
      * Procesa un mensaje de compra finalizada recibido desde la cola JMS.

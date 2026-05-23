@@ -13,7 +13,7 @@ import java.math.BigDecimal;
  *
  * <p>Cada servicio medico tiene un tipo categorizado ({@link TipoServicio}),
  * un precio individual y una duracion estimada en minutos. Los servicios
- * se asocian a uno o mas {@link Plan} mediante una relacion ManyToMany.</p>
+ * se asocian a uno o mas {@link PlanSalud} mediante una relacion ManyToMany.</p>
  *
  * @see Plan
  * @see CatalogoController#servicios()

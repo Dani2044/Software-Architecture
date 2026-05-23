@@ -31,7 +31,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Plan {
+public class PlanSalud {
 
     /** Identificador unico auto-generado del plan. */
     @Id

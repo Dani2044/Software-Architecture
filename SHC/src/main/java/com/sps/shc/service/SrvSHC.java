@@ -2,7 +2,7 @@ package com.sps.shc.service;
 
 import com.sps.shc.dto.CompraTerminadaShcDto;
 import com.sps.shc.entity.HistoriaClinica;
-import com.sps.shc.repository.HistoriaClinicaRepository;
+import com.sps.shc.repository.RepoSHC;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,15 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>La operación completa se ejecuta dentro de una transacción para garantizar
  * la consistencia de los datos.</p>
  *
- * @see com.sps.shc.listener.ShcListener
- * @see com.sps.shc.repository.HistoriaClinicaRepository
+ * @see com.sps.shc.listener.ListenerSHC
+ * @see com.sps.shc.repository.RepoSHC
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class HistoriaClinicaService {
+public class SrvSHC {
 
-    private final HistoriaClinicaRepository repository;
+    private final RepoSHC repository;
 
     /**
      * Registra las historias clínicas derivadas de un evento de compra terminada.

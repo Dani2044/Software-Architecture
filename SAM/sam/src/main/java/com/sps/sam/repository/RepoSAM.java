@@ -19,7 +19,7 @@ import java.util.List;
  * @author SPS Team
  * @see AgendaServicio
  */
-public interface AgendaServicioRepository extends JpaRepository<AgendaServicio, Long> {
+public interface RepoSAM extends JpaRepository<AgendaServicio, Long> {
 
     /**
      * Verifica si ya existe un registro con la combinacion de numero de compra

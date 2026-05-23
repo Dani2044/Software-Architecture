@@ -1,9 +1,9 @@
 package com.sps.authcatalogo.config;
 
 import com.sps.authcatalogo.auth.Usuario;
-import com.sps.authcatalogo.auth.UsuarioRepository;
-import com.sps.authcatalogo.catalogo.Plan;
-import com.sps.authcatalogo.catalogo.PlanRepository;
+import com.sps.authcatalogo.auth.RepoAuth;
+import com.sps.authcatalogo.catalogo.PlanSalud;
+import com.sps.authcatalogo.catalogo.RepoCatalogo;
 import com.sps.authcatalogo.catalogo.ServicioMedico;
 import com.sps.authcatalogo.catalogo.ServicioMedicoRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ import java.util.List;
  * <p>La carga es idempotente: si ya existen registros, no se insertan datos duplicados.</p>
  *
  * @see com.sps.authcatalogo.auth.Usuario
- * @see com.sps.authcatalogo.catalogo.Plan
+ * @see com.sps.authcatalogo.catalogo.PlanSalud
  * @see com.sps.authcatalogo.catalogo.ServicioMedico
  */
 @Component
@@ -40,8 +40,8 @@ import java.util.List;
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
-    private final UsuarioRepository usuarioRepository;
-    private final PlanRepository planRepository;
+    private final RepoAuth repoAuth;
+    private final RepoCatalogo repoCatalogo;
     private final ServicioMedicoRepository servicioRepository;
     private final PasswordEncoder encoder;
 
@@ -65,8 +65,8 @@ public class DataSeeder implements CommandLineRunner {
      */
     private void seedUsuarios() {
         // Evita duplicados: solo inserta si no hay usuarios en la tabla
-        if (usuarioRepository.count() > 0) return;
-        usuarioRepository.save(Usuario.builder()
+        if (repoAuth.count() > 0) return;
+        repoAuth.save(Usuario.builder()
                 .username("juan")
                 .passwordHash(encoder.encode("juan123"))
                 .cedula("1000000001")
@@ -113,7 +113,7 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         // --- Planes de salud que agrupan servicios ---
-        planRepository.save(Plan.builder()
+        repoCatalogo.save(PlanSalud.builder()
                 .codigo("PLAN-BASICO-001")
                 .nombre("Plan Basico")
                 .precio(new BigDecimal("130000"))
@@ -121,7 +121,7 @@ public class DataSeeder implements CommandLineRunner {
                 .servicios(List.of(consulta, examen))
                 .build());
 
-        planRepository.save(Plan.builder()
+        repoCatalogo.save(PlanSalud.builder()
                 .codigo("PLAN-PREMIUM-001")
                 .nombre("Plan Premium")
                 .precio(new BigDecimal("630000"))

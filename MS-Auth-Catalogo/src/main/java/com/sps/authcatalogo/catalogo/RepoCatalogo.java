@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * Repositorio Spring Data JPA para la entidad {@link Plan}.
+ * Repositorio Spring Data JPA para la entidad {@link PlanSalud}.
  *
  * <p>Proporciona operaciones CRUD estandar y un metodo de consulta derivado
  * para buscar planes por su codigo de negocio, utilizado en el endpoint
@@ -13,7 +13,7 @@ import java.util.Optional;
  *
  * @see CatalogoController
  */
-public interface PlanRepository extends JpaRepository<Plan, Long> {
+public interface RepoCatalogo extends JpaRepository<PlanSalud, Long> {
 
     /**
      * Busca un plan de salud por su codigo unico de negocio.
@@ -21,5 +21,5 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
      * @param codigo codigo del plan a buscar (ej. {@code "PLAN-BASICO-001"})
      * @return un {@link Optional} con el plan si existe, vacio en caso contrario
      */
-    Optional<Plan> findByCodigo(String codigo);
+    Optional<PlanSalud> findByCodigo(String codigo);
 }

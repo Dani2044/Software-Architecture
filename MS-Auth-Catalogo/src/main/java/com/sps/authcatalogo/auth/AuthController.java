@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,6 +21,9 @@ import java.util.Map;
  * delega al token JWT que el cliente debe enviar en solicitudes posteriores
  * a otros microservicios.</p>
  *
+ * <p>La logica de negocio se delega a {@link SrvAuth}.</p>
+ *
+ * @see SrvAuth
  * @see JwtService
  * @see com.sps.authcatalogo.config.SecurityConfig
  */
@@ -30,9 +32,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UsuarioRepository repository;
-    private final JwtService jwtService;
-    private final PasswordEncoder encoder;
+    private final SrvAuth srvAuth;
 
     /**
      * Autentica a un usuario mediante username y contrasena.
@@ -51,15 +51,8 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        return repository.findByUsername(req.getUsername())
-                // Verifica la contrasena contra el hash BCrypt almacenado
-                .filter(u -> encoder.matches(req.getPassword(), u.getPasswordHash()))
-                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(Map.of(
-                        "token", jwtService.generate(u),
-                        "cedula", u.getCedula(),
-                        "nombre", u.getNombre(),
-                        "correo", u.getCorreo()
-                )))
+        return srvAuth.login(req.getUsername(), req.getPassword())
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(401)
                         .body(Map.of("error", "Credenciales invalidas")));
     }
@@ -80,19 +73,11 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
-        // Verificacion de duplicados antes de persistir
-        if (repository.findByUsername(req.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Username ya existe"));
-        }
-        Usuario u = Usuario.builder()
-                .username(req.getUsername())
-                .passwordHash(encoder.encode(req.getPassword()))
-                .cedula(req.getCedula())
-                .nombre(req.getNombre())
-                .correo(req.getCorreo())
-                .build();
-        repository.save(u);
-        return ResponseEntity.ok(Map.of("status", "ok"));
+        return srvAuth.register(req.getUsername(), req.getPassword(), req.getCedula(),
+                        req.getNombre(), req.getCorreo())
+                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(Map.of("status", "ok")))
+                .orElseGet(() -> ResponseEntity.badRequest()
+                        .body(Map.of("error", "Username ya existe")));
     }
 
     /**

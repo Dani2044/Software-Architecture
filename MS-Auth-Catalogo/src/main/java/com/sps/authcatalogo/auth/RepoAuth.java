@@ -13,7 +13,7 @@ import java.util.Optional;
  *
  * @see AuthController
  */
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface RepoAuth extends JpaRepository<Usuario, Long> {
 
     /**
      * Busca un usuario por su nombre de usuario.

@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
  * <p>La fecha de registro se asigna automáticamente mediante el callback
  * {@link PrePersist} si no ha sido establecida previamente.</p>
  *
- * @see com.sps.shc.repository.HistoriaClinicaRepository
- * @see com.sps.shc.service.HistoriaClinicaService
+ * @see com.sps.shc.repository.RepoSHC
+ * @see com.sps.shc.service.SrvSHC
  */
 @Entity
 @Table(name = "historia_clinica",

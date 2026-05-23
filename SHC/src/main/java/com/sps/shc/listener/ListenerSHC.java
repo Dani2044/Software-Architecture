@@ -1,7 +1,7 @@
 package com.sps.shc.listener;
 
 import com.sps.shc.dto.CompraTerminadaShcDto;
-import com.sps.shc.service.HistoriaClinicaService;
+import com.sps.shc.service.SrvSHC;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -15,20 +15,20 @@ import org.springframework.stereotype.Component;
  * en la cola {@code ColaSHC}. Este listener lo deserializa automáticamente
  * en un {@link CompraTerminadaShcDto} (gracias al convertidor Jackson configurado
  * en {@link com.sps.shc.config.JmsConfig}) y delega el procesamiento al
- * {@link HistoriaClinicaService}.</p>
+ * {@link SrvSHC}.</p>
  *
  * <p>El nombre de la cola es configurable mediante la propiedad
  * {@code sps.ColaSHC}, con valor por defecto {@code ColaSHC}.</p>
  *
  * @see com.sps.shc.config.JmsConfig
- * @see com.sps.shc.service.HistoriaClinicaService
+ * @see com.sps.shc.service.SrvSHC
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ShcListener {
+public class ListenerSHC {
 
-    private final HistoriaClinicaService service;
+    private final SrvSHC service;
 
     /**
      * Procesa un mensaje de compra terminada recibido desde la cola JMS.

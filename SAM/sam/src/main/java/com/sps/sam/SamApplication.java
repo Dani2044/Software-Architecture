@@ -16,7 +16,7 @@ import org.springframework.jms.annotation.EnableJms;
  * y registrados automaticamente al iniciar la aplicacion.</p>
  *
  * @author SPS Team
- * @see com.sps.sam.listener.SamListener
+ * @see com.sps.sam.listener.ListenerSAM
  * @see com.sps.sam.config.JmsConfig
  */
 @SpringBootApplication

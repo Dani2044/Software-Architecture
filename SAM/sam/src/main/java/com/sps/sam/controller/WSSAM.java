@@ -1,7 +1,7 @@
 package com.sps.sam.controller;
 
 import com.sps.sam.entity.AgendaServicio;
-import com.sps.sam.repository.AgendaServicioRepository;
+import com.sps.sam.repository.RepoSAM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,18 +23,18 @@ import java.util.Map;
  * </ul>
  *
  * <p>Nota: la escritura de datos no se realiza a traves de este controlador,
- * sino mediante el listener JMS {@link com.sps.sam.listener.SamListener}
+ * sino mediante el listener JMS {@link com.sps.sam.listener.ListenerSAM}
  * que consume mensajes de la cola {@code ColaSAM}.</p>
  *
  * @author SPS Team
- * @see com.sps.sam.repository.AgendaServicioRepository
+ * @see com.sps.sam.repository.RepoSAM
  */
 @RestController
 @RequestMapping("/api/sam")
 @RequiredArgsConstructor
-public class AgendaController {
+public class WSSAM {
 
-    private final AgendaServicioRepository repository;
+    private final RepoSAM repository;
 
     /**
      * Endpoint de verificacion de salud del microservicio.

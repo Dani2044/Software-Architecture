@@ -1,7 +1,7 @@
 package com.sps.shc.controller;
 
 import com.sps.shc.entity.HistoriaClinica;
-import com.sps.shc.repository.HistoriaClinicaRepository;
+import com.sps.shc.repository.RepoSHC;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,16 +19,16 @@ import java.util.Map;
  * </ul>
  *
  * <p>Estos endpoints son de solo lectura. La creación de registros se realiza
- * exclusivamente a través del listener JMS ({@link com.sps.shc.listener.ShcListener}).</p>
+ * exclusivamente a través del listener JMS ({@link com.sps.shc.listener.ListenerSHC}).</p>
  *
- * @see com.sps.shc.repository.HistoriaClinicaRepository
+ * @see com.sps.shc.repository.RepoSHC
  */
 @RestController
 @RequestMapping("/api/shc")
 @RequiredArgsConstructor
-public class HistoriaClinicaController {
+public class WSSHC {
 
-    private final HistoriaClinicaRepository repository;
+    private final RepoSHC repository;
 
     /**
      * Endpoint de verificación de salud (health check) del microservicio.

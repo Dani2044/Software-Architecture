@@ -20,16 +20,18 @@ import java.util.Map;
  * <p>Todos los endpoints son de solo lectura (GET) y no requieren autenticacion,
  * ya que el catalogo es informacion publica consultada por el frontend SPS-SPA.</p>
  *
- * @see Plan
+ * <p>La logica de negocio se delega a {@link SrvCatalogo}.</p>
+ *
+ * @see PlanSalud
  * @see ServicioMedico
+ * @see SrvCatalogo
  */
 @RestController
 @RequestMapping("/api/catalogo")
 @RequiredArgsConstructor
 public class CatalogoController {
 
-    private final PlanRepository planRepository;
-    private final ServicioMedicoRepository servicioRepository;
+    private final SrvCatalogo srvCatalogo;
 
     /**
      * Endpoint de verificacion de salud (health check) del microservicio.
@@ -45,23 +47,23 @@ public class CatalogoController {
      * Retorna la lista completa de planes de salud disponibles, incluyendo
      * los servicios medicos asociados a cada plan.
      *
-     * @return lista de todos los {@link Plan} registrados en el sistema
+     * @return lista de todos los {@link PlanSalud} registrados en el sistema
      */
     @GetMapping("/planes")
-    public List<Plan> planes() {
-        return planRepository.findAll();
+    public List<PlanSalud> planes() {
+        return srvCatalogo.listarPlanes();
     }
 
     /**
      * Busca y retorna un plan de salud especifico por su codigo de negocio.
      *
      * @param codigo codigo unico del plan (ej. {@code "PLAN-BASICO-001"})
-     * @return el {@link Plan} correspondiente
+     * @return el {@link PlanSalud} correspondiente
      * @throws java.util.NoSuchElementException si no se encuentra un plan con el codigo dado
      */
     @GetMapping("/planes/{codigo}")
-    public Plan plan(@PathVariable String codigo) {
-        return planRepository.findByCodigo(codigo).orElseThrow();
+    public PlanSalud plan(@PathVariable String codigo) {
+        return srvCatalogo.obtenerPlan(codigo).orElseThrow();
     }
 
     /**
@@ -71,6 +73,6 @@ public class CatalogoController {
      */
     @GetMapping("/servicios")
     public List<ServicioMedico> servicios() {
-        return servicioRepository.findAll();
+        return srvCatalogo.listarServicios();
     }
 }

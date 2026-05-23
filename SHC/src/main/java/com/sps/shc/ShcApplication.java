@@ -16,8 +16,8 @@ import org.springframework.jms.annotation.EnableJms;
  * permitiendo que los listeners anotados con {@code @JmsListener} consuman
  * mensajes de forma asíncrona.</p>
  *
- * @see com.sps.shc.listener.ShcListener
- * @see com.sps.shc.service.HistoriaClinicaService
+ * @see com.sps.shc.listener.ListenerSHC
+ * @see com.sps.shc.service.SrvSHC
  */
 @SpringBootApplication
 @EnableJms

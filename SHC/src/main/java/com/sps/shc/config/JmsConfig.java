@@ -11,7 +11,7 @@ import org.springframework.jms.support.converter.MessageType;
  *
  * <p>Define el convertidor de mensajes que permite serializar y deserializar
  * objetos Java a/desde JSON al enviar y recibir mensajes a través de ActiveMQ.
- * Esto es esencial para que el {@link com.sps.shc.listener.ShcListener} pueda
+ * Esto es esencial para que el {@link com.sps.shc.listener.ListenerSHC} pueda
  * recibir el DTO {@link com.sps.shc.dto.CompraTerminadaShcDto} directamente
  * como parámetro del método listener.</p>
  */

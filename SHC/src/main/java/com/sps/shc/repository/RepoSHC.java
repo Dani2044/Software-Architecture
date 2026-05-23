@@ -17,9 +17,9 @@ import java.util.List;
  * para una compra específica antes de insertar un nuevo registro.</p>
  *
  * @see com.sps.shc.entity.HistoriaClinica
- * @see com.sps.shc.service.HistoriaClinicaService
+ * @see com.sps.shc.service.SrvSHC
  */
-public interface HistoriaClinicaRepository extends JpaRepository<HistoriaClinica, Long> {
+public interface RepoSHC extends JpaRepository<HistoriaClinica, Long> {
 
     /**
      * Verifica si ya existe un registro de historia clínica para la combinación

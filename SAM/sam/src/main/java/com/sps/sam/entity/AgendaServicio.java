@@ -19,12 +19,12 @@ import java.time.LocalDateTime;
  * ({@code numero_compra}, {@code codigo_servicio}) es unica, lo que garantiza
  * que un mismo servicio no se registre dos veces para la misma compra.
  * Esta restriccion a nivel de base de datos complementa la verificacion
- * de idempotencia que realiza {@link com.sps.sam.service.AgendaService}
+ * de idempotencia que realiza {@link com.sps.sam.service.SrvSAM}
  * a nivel de aplicacion.</p>
  *
  * @author SPS Team
- * @see com.sps.sam.repository.AgendaServicioRepository
- * @see com.sps.sam.service.AgendaService
+ * @see com.sps.sam.repository.RepoSAM
+ * @see com.sps.sam.service.SrvSAM
  */
 @Entity
 @Table(name = "agenda_servicio",

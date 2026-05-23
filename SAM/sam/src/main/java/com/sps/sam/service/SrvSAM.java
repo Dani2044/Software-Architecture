@@ -2,7 +2,7 @@ package com.sps.sam.service;
 
 import com.sps.sam.dto.CompraTerminadaSamDto;
 import com.sps.sam.entity.AgendaServicio;
-import com.sps.sam.repository.AgendaServicioRepository;
+import com.sps.sam.repository.RepoSAM;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  * La idempotencia se garantiza a dos niveles:</p>
  * <ol>
  *   <li><b>Nivel de aplicacion:</b> antes de insertar, se verifica con
- *       {@link AgendaServicioRepository#existsByNumeroCompraAndCodigoServicio}
+ *       {@link RepoSAM#existsByNumeroCompraAndCodigoServicio}
  *       si la combinacion (numeroCompra, codigoServicio) ya existe.</li>
  *   <li><b>Nivel de base de datos:</b> la tabla {@code agenda_servicio}
  *       posee una restriccion {@code UNIQUE} sobre las mismas columnas,
@@ -26,15 +26,15 @@ import org.springframework.transaction.annotation.Transactional;
  * </ol>
  *
  * @author SPS Team
- * @see com.sps.sam.listener.SamListener
+ * @see com.sps.sam.listener.ListenerSAM
  * @see com.sps.sam.entity.AgendaServicio
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AgendaService {
+public class SrvSAM {
 
-    private final AgendaServicioRepository repository;
+    private final RepoSAM repository;
 
     /**
      * Registra en la agenda todos los servicios medicos contenidos en un

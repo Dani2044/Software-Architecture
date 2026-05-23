@@ -23,8 +23,8 @@ import java.util.List;
  * <p>Por cada combinación de {@code numeroCompra} + {@code plan.codigo} se genera
  * un registro individual de {@link com.sps.shc.entity.HistoriaClinica}.</p>
  *
- * @see com.sps.shc.listener.ShcListener
- * @see com.sps.shc.service.HistoriaClinicaService#registrarCompra(CompraTerminadaShcDto)
+ * @see com.sps.shc.listener.ListenerSHC
+ * @see com.sps.shc.service.SrvSHC#registrarCompra(CompraTerminadaShcDto)
  */
 @Data
 @Builder
