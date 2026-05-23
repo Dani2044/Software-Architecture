@@ -154,7 +154,7 @@ public class SnsController {
                 "status", "UP",
                 "servicio", "SNS",
                 "nodo", "Core-A",
-                "ip", "10.43.100.122"
+                "ip", "10.43.101.18"
         ));
     }
 }

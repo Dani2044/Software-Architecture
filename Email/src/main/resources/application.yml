@@ -36,8 +36,8 @@ spring:
 
 email:
   from: ${MAIL_USER}
-  salud-pay-url: ${SALUD_PAY_URL:http://10.43.101.18:5000}
-  sps-url-pago: ${SPS_URL_PAGO:http://10.43.101.18:4201/pago}
+  salud-pay-url: ${SALUD_PAY_URL:http://10.32.100.111:5000}
+  sps-url-pago: ${SPS_URL_PAGO:http://10.32.100.111:4201/pago}
 
 management:
   endpoints:

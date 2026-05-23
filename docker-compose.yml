@@ -3,10 +3,10 @@
 # Arquitectura de Software 2026-10 - Pontificia Universidad Javeriana
 #
 # USO: cada integrante levanta su perfil:
-#   Juan    (10.43.100.111): COMPOSE_PROFILES=juan   docker compose up -d --build
-#   Daniel  (10.43.100.122): COMPOSE_PROFILES=daniel docker compose up -d --build
+#   Juan    (10.43.100.122): COMPOSE_PROFILES=juan   docker compose up -d --build
+#   Daniel  (10.43.101.18):  COMPOSE_PROFILES=daniel docker compose up -d --build
 #   Kath    (10.43.99.121):  COMPOSE_PROFILES=kath   docker compose up -d --build
-#   Mapa    (10.43.101.18):  COMPOSE_PROFILES=mapa   docker compose up -d --build
+#   Mapa    (10.32.100.111): COMPOSE_PROFILES=mapa   docker compose up -d --build
 #
 # Variables sensibles en .env (copiar de .env.example y completar).
 # ============================================================================
@@ -14,7 +14,7 @@
 services:
 
   # ==========================================================================
-  # PERFIL JUAN (10.43.100.111) - MS-Compra Maestro + Broker ActiveMQ
+  # PERFIL JUAN (10.43.100.122) - MS-Compra Maestro + Broker ActiveMQ
   # ==========================================================================
   activemq:
     image: apache/activemq-classic:latest
@@ -56,13 +56,13 @@ services:
       SNS_URL: ${SNS_URL}
       SNS_CODIGO: ${SNS_CODIGO}
       SALUD_PAY_URL: ${SALUD_PAY_URL}
-      EMAIL_URL: http://10.43.100.122:8084
+      EMAIL_URL: http://10.43.101.18:8084
     ports:
       - "8081:8081"
     restart: unless-stopped
 
   # ==========================================================================
-  # PERFIL DANIEL (10.43.100.122) - Balanceador, SNS, Auth+Catalogo, Email
+  # PERFIL DANIEL (10.43.101.18) - Balanceador, SNS, Auth+Catalogo, Email
   # ==========================================================================
   mysql-auth:
     image: mysql:8.0
@@ -234,7 +234,7 @@ services:
     restart: unless-stopped
 
   # ==========================================================================
-  # PERFIL MAPA (10.43.101.18) - SaludPay (.NET + SPA) + SPS-SPA
+  # PERFIL MAPA (10.32.100.111) - SaludPay (.NET + SPA) + SPS-SPA
   # NOTA: el enunciado pide .NET en Kestrel "fuera de IDE". Si Mapa prefiere
   # correrlo dockerizado, este perfil lo construye; si no, puede lanzar
   # SaludPay-Back con `dotnet run` directamente.

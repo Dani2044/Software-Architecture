@@ -18,7 +18,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
 
   activemq:
-    broker-url: ${ACTIVEMQ_URL:tcp://10.43.100.111:61616}
+    broker-url: ${ACTIVEMQ_URL:tcp://10.43.100.122:61616}
     user: ${ACTIVEMQ_USER:admin}
     password: ${ACTIVEMQ_PASS:admin}
     packages:

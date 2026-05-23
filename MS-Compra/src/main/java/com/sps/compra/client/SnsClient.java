@@ -23,7 +23,7 @@ public class SnsClient {
 
     private final WebClient.Builder webClientBuilder;
 
-    @Value("${sns.base-url:http://10.43.100.122:8090}")
+    @Value("${sns.base-url:http://10.43.101.18:8090}")
     private String snsBaseUrl;
 
     @Value("${sns.codigo-aseguradora:ASEG001}")

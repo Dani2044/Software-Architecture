@@ -22,7 +22,7 @@ public class SaludPayClient {
 
     private final WebClient.Builder webClientBuilder;
 
-    @Value("${saludpay.base-url:http://10.43.101.18:5000}")
+    @Value("${saludpay.base-url:http://10.32.100.111:5000}")
     private String saludPayUrl;
 
     public void publicarCompraPendiente(String cedula, Long numeroCompra, BigDecimal valor) {

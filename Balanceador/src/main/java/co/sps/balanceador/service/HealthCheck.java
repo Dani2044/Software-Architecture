@@ -18,9 +18,8 @@ public class HealthCheck {
     private static final String HEALTH_PATH = "/actuator/health";
 
     private static final List<BackendDef> BACKEND_DEFINITIONS = List.of(
-            new BackendDef("compra-master",   "http://10.43.100.111:8082"),
-            new BackendDef("compra-replica1", "http://10.43.99.121:8082"),
-            new BackendDef("compra-replica2", "http://10.43.99.121:8083")
+            new BackendDef("compra-master",  "http://10.43.100.122:8081"),
+            new BackendDef("compra-replica", "http://10.43.99.121:8081")
     );
 
     private final SrvRegistryInterface registry;

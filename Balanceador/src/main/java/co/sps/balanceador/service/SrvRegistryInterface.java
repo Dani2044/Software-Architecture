@@ -35,9 +35,8 @@ public class SrvRegistryInterface {
     }
 
     public void initDefaults() {
-        register("compra-master", "http://10.43.100.111:8082");
-        register("compra-replica1", "http://10.43.99.121:8082");
-        register("compra-replica2", "http://10.43.99.121:8083");
+        register("compra-master",  "http://10.43.100.122:8081");
+        register("compra-replica", "http://10.43.99.121:8081");
         log.info("Registro inicializado con {} backends.", registry.size());
     }
 }

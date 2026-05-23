@@ -15,7 +15,7 @@ SPS es una solución empresarial distribuida para la adquisición de planes de s
 - **DMZ:** las SPA (`SPS-SPA`, `SaludPay-SPA`) están aisladas en el nodo de Mapa, separadas de la lógica de negocio.
 - **BD por sistema:** MS-Auth, MS-Compra, SAM, SHC, SNS, Email y SaludPay tienen cada uno su propia BD (5 MySQL + 1 SQL Server). Nunca se conecta una BD desde otro sistema.
 - **Despliegue distribuido:** los 4 integrantes levantan en paralelo desde la misma rama del repo, cada uno con su perfil Docker Compose.
-- **Escalabilidad:** dos réplicas de `MS-Compra` (maestro en .111, réplica en .121) detrás del `Balanceador` Spring Boot.
+- **Escalabilidad:** dos réplicas de `MS-Compra` (maestro en .122, réplica en .121) detrás del `Balanceador` Spring Boot.
 - **MOM:** ActiveMQ con 3 colas (`cola.pago`, `cola.sam`, `cola.shc`). Todas las comunicaciones MS-Compra ⇄ SAM/SHC/SaludPay pasan por allí.
 
 ---
@@ -24,13 +24,13 @@ SPS es una solución empresarial distribuida para la adquisición de planes de s
 
 | Integrante | IP | Motor | Componentes |
 | --- | --- | --- | --- |
-| **Daniel Castro** | `10.43.100.122` | Docker Engine | Balanceador · SNS · MS-Auth-Catalogo · Email |
-| **Mapa Rodríguez** | `10.43.101.18` | Kestrel (.NET) + Docker | SPS-SPA · SaludPay-Back · SaludPay-SPA |
+| **Daniel Castro** | `10.43.101.18` | Docker Engine | Balanceador · SNS · MS-Auth-Catalogo · Email |
+| **Mapa Rodríguez** | `10.32.100.111` | Kestrel (.NET) + Docker | SPS-SPA · SaludPay-Back · SaludPay-SPA |
 | **Katheryn Guasca** | `10.43.99.121` | Docker Engine | MS-Compra (réplica) · SAM · SHC |
-| **Juan Rozo** | `10.43.100.111` | Docker Engine | MS-Compra (maestro) · ActiveMQ |
+| **Juan Rozo** | `10.43.100.122` | Docker Engine | MS-Compra (maestro) · ActiveMQ |
 
 > **Dos nginx, roles distintos:**
-> - `Balanceador.jar` (Spring Boot, en .122) → balanceador L7 entre las dos réplicas de MS-Compra.
+> - `Balanceador.jar` (Spring Boot, en .101.18) → balanceador L7 entre las dos réplicas de MS-Compra.
 > - `nginx` dentro de `SPS-SPA` y `SaludPay-SPA` → servidor de estáticos del bundle Angular (`ng build` → `dist/` en imagen `nginx:alpine`). No balancea nada.
 
 ---
@@ -80,20 +80,20 @@ nano .env                  # completa valores reales (especialmente MAIL_USER/MA
 
 Luego, **cada integrante levanta solo su perfil** con Docker Compose profiles:
 
-### Juan (10.43.100.111) — broker + MS-Compra maestro
+### Juan (10.43.100.122) — broker + MS-Compra maestro
 ```bash
 COMPOSE_PROFILES=juan docker compose up -d --build
-# Consola ActiveMQ:  http://10.43.100.111:8161  (admin/admin)
-# MS-Compra:         http://10.43.100.111:8081/api/compra/health
+# Consola ActiveMQ:  http://10.43.100.122:8161  (admin/admin)
+# MS-Compra:         http://10.43.100.122:8081/api/compra/health
 ```
 
-### Daniel (10.43.100.122) — Balanceador + SNS + Auth+Cat + Email
+### Daniel (10.43.101.18) — Balanceador + SNS + Auth+Cat + Email
 ```bash
 COMPOSE_PROFILES=daniel docker compose up -d --build
-# Balanceador:  http://10.43.100.122:8080/actuator/health
-# SNS:          http://10.43.100.122:8090/api/sns/health
-# Auth+Cat:     http://10.43.100.122:8082/api/catalogo/health
-# Email:        http://10.43.100.122:8084/api/email/health
+# Balanceador:  http://10.43.101.18:8080/actuator/health
+# SNS:          http://10.43.101.18:8090/api/sns/health
+# Auth+Cat:     http://10.43.101.18:8082/api/catalogo/health
+# Email:        http://10.43.101.18:8084/api/email/health
 ```
 
 ### Kath (10.43.99.121) — MS-Compra réplica + SAM + SHC
@@ -104,12 +104,12 @@ COMPOSE_PROFILES=kath docker compose up -d --build
 # SHC:        http://10.43.99.121:8087/api/shc/health
 ```
 
-### Mapa (10.43.101.18) — SaludPay-Back + SPAs
+### Mapa (10.32.100.111) — SaludPay-Back + SPAs
 ```bash
 COMPOSE_PROFILES=mapa docker compose up -d --build
-# SaludPay-Back:  http://10.43.101.18:5000/api/saludpay/health
-# SPS-SPA:        http://10.43.101.18:4200
-# SaludPay-SPA:   http://10.43.101.18:4201
+# SaludPay-Back:  http://10.32.100.111:5000/api/saludpay/health
+# SPS-SPA:        http://10.32.100.111:4200
+# SaludPay-SPA:   http://10.32.100.111:4201
 ```
 
 Si Mapa prefiere correr `SaludPay-Back` con Kestrel directamente (sin contenedor):
@@ -123,7 +123,7 @@ dotnet run                 # escucha en http://0.0.0.0:5000
 ## Flujo end-to-end
 
 ```
-[1] Cliente → SPS-SPA → Balanceador (.122) → MS-Compra (.111 o .121)
+[1] Cliente → SPS-SPA → Balanceador (.101.18) → MS-Compra (.122 o .121)
                                                   │ persiste (estado=CREADA), responde 202
                                                   ▼
                                               SNS (.122) ── WebClient async ──┐
@@ -135,7 +135,7 @@ dotnet run                 # escucha en http://0.0.0.0:5000
                                   ├─ POST → Email (correo + URL pago)
                                   └─ POST → SaludPay-Back (publica compra pendiente)
 
-[2] Cliente → SaludPay-SPA → SaludPay-Back (Kestrel, .101.18)
+[2] Cliente → SaludPay-SPA → SaludPay-Back (Kestrel, .32.100.111)
                                   │ persiste pago en SQL Server
                                   │ PUBLISH cola.pago via Apache.NMS.ActiveMQ
                                   ▼
@@ -173,10 +173,10 @@ Las tres son **colas point-to-point** (no tópicos): cada mensaje lo procesa exa
 3. **Agregar plan al carrito**, confirmar → estado debe quedar en `CREADA → EN_VALIDACION_SNS → APROBADA`.
 4. **Verifica el correo** (revisa la BD `sps_email_db` o el inbox configurado).
 5. **Abrir SaludPay-SPA** (`/login`) con `1000000001 / juan123`, pagar.
-6. **Consola ActiveMQ** (`http://10.43.100.111:8161`): debes ver 1 mensaje en `cola.pago`, luego en `cola.sam` y `cola.shc`.
+6. **Consola ActiveMQ** (`http://10.43.100.122:8161`): debes ver 1 mensaje en `cola.pago`, luego en `cola.sam` y `cola.shc`.
 7. **Consulta SAM y SHC**: `GET http://10.43.99.121:8086/api/sam/agenda/1000000001` y `GET http://10.43.99.121:8087/api/shc/historia/1000000001` deben listar registros.
 8. **Resiliencia SNS**: detén el contenedor `sns` → crear compra → debe quedar en `EN_VALIDACION_SNS`. Levanta `sns` → en menos de 15s la compra pasa a `APROBADA`.
-9. **Balanceo**: detén el contenedor `ms-compra` en .111 → el balanceador debe enrutar todo a .121 (`GET http://10.43.100.122:8080/api/compra/registry`).
+9. **Balanceo**: detén el contenedor `ms-compra` en .122 → el balanceador debe enrutar todo a .121 (`GET http://10.43.101.18:8080/api/compra/registry`).
 
 ---
 

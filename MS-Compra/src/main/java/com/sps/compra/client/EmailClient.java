@@ -23,10 +23,10 @@ public class EmailClient {
 
     private final WebClient.Builder webClientBuilder;
 
-    @Value("${email.base-url:http://10.43.100.122:8084}")
+    @Value("${email.base-url:http://10.43.101.18:8084}")
     private String emailBaseUrl;
 
-    @Value("${email.sps-url-pago:http://10.43.101.18:4201/pago}")
+    @Value("${email.sps-url-pago:http://10.32.100.111:4201/pago}")
     private String urlPago;
 
     public void enviarCorreoAprobacion(String correo, Long numeroCompra, BigDecimal valor) {

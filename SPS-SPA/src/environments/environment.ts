@@ -15,11 +15,11 @@ export const environment = {
    * URL del balanceador de carga (puerto 8080).
    * Todas las operaciones de compra se enrutan a traves de este endpoint.
    */
-  balanceadorUrl: 'http://10.43.100.122:8080',
+  balanceadorUrl: 'http://10.43.101.18:8080',
 
   /**
    * URL directa al microservicio de autenticacion y catalogo (puerto 8082).
    * Se usa para login JWT y para obtener la lista de planes de salud.
    */
-  authCatalogoUrl: 'http://10.43.100.122:8082'
+  authCatalogoUrl: 'http://10.43.101.18:8082'
 };

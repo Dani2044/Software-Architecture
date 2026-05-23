@@ -29,7 +29,7 @@ public class ActiveMqPagoPublisher : IPagoPublisher
         // Conversion del esquema Spring tcp://host:port -> NMS activemq:tcp://host:port
         var url = Environment.GetEnvironmentVariable("ACTIVEMQ_URL")
                   ?? cfg["ActiveMq:Url"]
-                  ?? "tcp://10.43.100.111:61616";
+                  ?? "tcp://10.43.100.122:61616";
         _brokerUri = $"activemq:{url}";
         _user = Environment.GetEnvironmentVariable("ACTIVEMQ_USER") ?? "admin";
         _pass = Environment.GetEnvironmentVariable("ACTIVEMQ_PASS") ?? "admin";
