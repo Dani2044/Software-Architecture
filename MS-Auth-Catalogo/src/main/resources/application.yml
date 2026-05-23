@@ -1,0 +1,33 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: ms-auth-catalogo
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:mysql-auth}:3306/sps_auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: ${DB_PASS:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+
+jwt:
+  secret: ${JWT_SECRET:cambiar-en-produccion-clave-de-al-menos-32-bytes-para-hs256}
+  expiration-ms: 3600000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    "[com.sps.authcatalogo]": INFO
