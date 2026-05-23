@@ -7,9 +7,9 @@ namespace SaludPay.Api.Controllers;
 [Route("api/pago")]
 public class WSPagosSP : ControllerBase
 {
-    private readonly IPagoService _pagoService;
+    private readonly ISrvPagosSP _pagoService;
 
-    public WSPagosSP(IPagoService pagoService) => _pagoService = pagoService;
+    public WSPagosSP(ISrvPagosSP pagoService) => _pagoService = pagoService;
 
     public record PagoRequest(string Cedula, long NumeroCompra, decimal ValorPagado);
 

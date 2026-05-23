@@ -7,9 +7,9 @@ namespace SaludPay.Api.Controllers;
 [Route("api/saludpay/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthService _auth;
+    private readonly ISrvAuthSP _auth;
 
-    public AuthController(IAuthService auth) => _auth = auth;
+    public AuthController(ISrvAuthSP auth) => _auth = auth;
 
     public record LoginRequest(string Cedula, string Password);
 

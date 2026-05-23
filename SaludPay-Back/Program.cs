@@ -20,8 +20,8 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
 builder.Services.AddSingleton<IPagoPublisher, IntegraConfirmacion>();
-builder.Services.AddScoped<IAuthService, SrvAuthSP>();
-builder.Services.AddScoped<IPagoService, SrvPagosSP>();
+builder.Services.AddScoped<ISrvAuthSP, SrvAuthSP>();
+builder.Services.AddScoped<ISrvPagosSP, SrvPagosSP>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
