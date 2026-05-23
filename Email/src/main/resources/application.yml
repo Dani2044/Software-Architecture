@@ -7,10 +7,10 @@ spring:
   profiles:
     active: production
   datasource:
-    url: jdbc:mysql://10.43.101.18:3306/sps_email?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${DB_HOST:mysql-email}:3306/sps_email_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: sps_user
-    password: sps_pass_CAMBIAR
+    username: root
+    password: ${DB_PASS:root}
   jpa:
     hibernate:
       ddl-auto: update
@@ -36,8 +36,8 @@ spring:
 
 email:
   from: ${MAIL_USER}
-  salud-pay-url: ${SALUD_PAY_URL:http://10.43.101.18:8080}
-  sps-url-pago: ${SPS_URL_PAGO:http://10.43.101.18:4200/pago}
+  salud-pay-url: ${SALUD_PAY_URL:http://10.43.101.18:5000}
+  sps-url-pago: ${SPS_URL_PAGO:http://10.43.101.18:4201/pago}
 
 management:
   endpoints:
