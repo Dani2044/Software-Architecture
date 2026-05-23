@@ -8,17 +8,17 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Listener JMS que consume mensajes de la cola {@code cola.shc} de ActiveMQ.
+ * Listener JMS que consume mensajes de la cola {@code ColaSHC} de ActiveMQ.
  *
  * <p>Este componente es el punto de entrada asíncrono del microservicio SHC.
  * Cada vez que el microservicio MS-Compra finaliza una compra, publica un mensaje
- * en la cola {@code cola.shc}. Este listener lo deserializa automáticamente
+ * en la cola {@code ColaSHC}. Este listener lo deserializa automáticamente
  * en un {@link CompraTerminadaShcDto} (gracias al convertidor Jackson configurado
  * en {@link com.sps.shc.config.JmsConfig}) y delega el procesamiento al
  * {@link HistoriaClinicaService}.</p>
  *
  * <p>El nombre de la cola es configurable mediante la propiedad
- * {@code sps.cola.shc}, con valor por defecto {@code cola.shc}.</p>
+ * {@code sps.ColaSHC}, con valor por defecto {@code ColaSHC}.</p>
  *
  * @see com.sps.shc.config.JmsConfig
  * @see com.sps.shc.service.HistoriaClinicaService
@@ -38,9 +38,9 @@ public class ShcListener {
      *
      * @param evento DTO deserializado con los datos de la compra terminada
      */
-    @JmsListener(destination = "${sps.cola.shc:cola.shc}")
+    @JmsListener(destination = "${sps.ColaSHC:ColaSHC}")
     public void onCompraTerminada(CompraTerminadaShcDto evento) {
-        log.info("[cola.shc] Mensaje recibido: compra={}", evento.getNumeroCompra());
+        log.info("[ColaSHC] Mensaje recibido: compra={}", evento.getNumeroCompra());
         service.registrarCompra(evento);
     }
 }

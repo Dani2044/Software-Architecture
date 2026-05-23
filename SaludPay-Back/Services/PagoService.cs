@@ -47,7 +47,7 @@ public class PagoService : IPagoService
         });
         _db.SaveChanges();
 
-        // Notificar a MS-Compra via cola.pago
+        // Notificar a MS-Compra via ColaPagoConfirmado
         _publisher.Publicar(new PagoMessage(cedula, numeroCompra, valorPagado, DateTime.UtcNow));
         return true;
     }

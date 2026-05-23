@@ -37,7 +37,7 @@ export interface CompraPendiente {
  * 1. El usuario se autentica con {@link login} proporcionando cédula y contraseña.
  * 2. Se listan sus compras pendientes con {@link listarPendientes}.
  * 3. Al presionar «Pagar», se invoca {@link pagar}, que registra el pago en el
- *    backend y este a su vez envía un mensaje a la cola ActiveMQ `cola.pago`
+ *    backend y este a su vez envía un mensaje a la cola ActiveMQ `ColaPagoConfirmado`
  *    para notificar al sistema SAM (envío de correo de confirmación).
  *
  * @remarks
@@ -88,7 +88,7 @@ export class SaludPayService {
    * Registra el pago de una compra pendiente.
    *
    * Envía un `POST` al endpoint `/api/pago` del backend. El backend, a su vez,
-   * publica un mensaje en la cola ActiveMQ `cola.pago` para que el servicio
+   * publica un mensaje en la cola ActiveMQ `ColaPagoConfirmado` para que el servicio
    * SAM envíe un correo electrónico de confirmación al paciente.
    *
    * @param cedula - Cédula del paciente que realiza el pago.

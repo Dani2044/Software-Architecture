@@ -13,10 +13,10 @@ public class CompraEventPublisher {
 
     private final JmsTemplate jmsTemplate;
 
-    @Value("${sps.cola.sam:cola.sam}")
+    @Value("${sps.cola.sam:ColaSAM}")
     private String colaSam;
 
-    @Value("${sps.cola.shc:cola.shc}")
+    @Value("${sps.cola.shc:ColaSHC}")
     private String colaShc;
 
     public void notificarSam(CompraTerminadaSamEvento evento) {

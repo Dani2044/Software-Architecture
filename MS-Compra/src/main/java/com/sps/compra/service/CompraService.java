@@ -128,7 +128,7 @@ public class CompraService {
     }
 
     /**
-     * Llamado por PagoListener cuando llega un mensaje en cola.pago.
+     * Llamado por PagoListener cuando llega un mensaje en ColaPagoConfirmado.
      */
     @Transactional
     public void marcarComoPagada(Long numeroCompra, BigDecimal valorPagado) {

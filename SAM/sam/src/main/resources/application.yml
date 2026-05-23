@@ -28,7 +28,7 @@ spring:
 
 sps:
   cola:
-    sam: cola.sam
+    sam: ColaSAM
 
 management:
   endpoints:

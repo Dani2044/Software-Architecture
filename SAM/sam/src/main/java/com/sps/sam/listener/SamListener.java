@@ -8,7 +8,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Listener JMS que consume mensajes de la cola {@code cola.sam} de ActiveMQ.
+ * Listener JMS que consume mensajes de la cola {@code ColaSAM} de ActiveMQ.
  *
  * <p>Este componente es el punto de entrada asincrono del microservicio SAM.
  * Cuando el modulo MS-Compra finaliza una compra que incluye servicios medicos,
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  * el procesamiento al servicio de negocio {@link com.sps.sam.service.AgendaService}.</p>
  *
  * <p>El nombre de la cola se configura mediante la propiedad
- * {@code sps.cola.sam} (por defecto: {@code cola.sam}).</p>
+ * {@code sps.ColaSAM} (por defecto: {@code ColaSAM}).</p>
  *
  * @author SPS Team
  * @see com.sps.sam.service.AgendaService
@@ -42,9 +42,9 @@ public class SamListener {
      *               contiene los datos de la compra y los servicios medicos
      *               a registrar en la agenda
      */
-    @JmsListener(destination = "${sps.cola.sam:cola.sam}")
+    @JmsListener(destination = "${sps.ColaSAM:ColaSAM}")
     public void onCompraTerminada(CompraTerminadaSamDto evento) {
-        log.info("[cola.sam] Mensaje recibido: compra={} cedula={}",
+        log.info("[ColaSAM] Mensaje recibido: compra={} cedula={}",
                 evento.getNumeroCompra(), evento.getCedulaCliente());
         // Delega al servicio de negocio que maneja la logica de idempotencia y persistencia
         agendaService.registrarCompra(evento);

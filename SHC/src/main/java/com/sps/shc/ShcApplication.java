@@ -9,7 +9,7 @@ import org.springframework.jms.annotation.EnableJms;
  *
  * <p>Este microservicio forma parte de la arquitectura distribuida del sistema SPS
  * (Sistema de Compras en Salud). Su responsabilidad es escuchar eventos de compra
- * terminada a través de una cola ActiveMQ ({@code cola.shc}) y persistir los registros
+ * terminada a través de una cola ActiveMQ ({@code ColaSHC}) y persistir los registros
  * correspondientes de historia clínica en la base de datos.</p>
  *
  * <p>La anotación {@link EnableJms} activa la infraestructura de Spring JMS,

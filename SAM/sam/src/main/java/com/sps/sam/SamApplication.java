@@ -8,7 +8,7 @@ import org.springframework.jms.annotation.EnableJms;
  * Clase principal del microservicio SAM (Sistema de Agenda Medica).
  *
  * <p>SAM forma parte del sistema distribuido SPS (Sistema de Compras de Salud).
- * Su responsabilidad es escuchar la cola JMS {@code cola.sam} mediante ActiveMQ
+ * Su responsabilidad es escuchar la cola JMS {@code ColaSAM} mediante ActiveMQ
  * y persistir las citas de servicios medicos asociadas a compras finalizadas.</p>
  *
  * <p>La anotacion {@link EnableJms} activa la infraestructura de Spring JMS

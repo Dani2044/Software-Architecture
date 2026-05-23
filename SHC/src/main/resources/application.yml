@@ -28,7 +28,7 @@ spring:
 
 sps:
   cola:
-    shc: cola.shc
+    shc: ColaSHC
 
 management:
   endpoints:

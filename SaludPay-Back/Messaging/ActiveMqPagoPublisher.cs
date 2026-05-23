@@ -12,7 +12,7 @@ public interface IPagoPublisher
 public record PagoMessage(string Cedula, long NumeroCompra, decimal ValorPagado, DateTime FechaPago);
 
 /// <summary>
-/// Publica mensajes a cola.pago en ActiveMQ.
+/// Publica mensajes a ColaPagoConfirmado en ActiveMQ.
 /// Compatible con spring-boot-starter-activemq del lado MS-Compra:
 /// el converter Jackson de Spring lee TextMessage JSON y deserializa al tipo destino.
 /// </summary>
@@ -33,7 +33,7 @@ public class ActiveMqPagoPublisher : IPagoPublisher
         _brokerUri = $"activemq:{url}";
         _user = Environment.GetEnvironmentVariable("ACTIVEMQ_USER") ?? "admin";
         _pass = Environment.GetEnvironmentVariable("ACTIVEMQ_PASS") ?? "admin";
-        _cola = cfg["ActiveMq:ColaPago"] ?? "cola.pago";
+        _cola = cfg["ActiveMq:ColaPago"] ?? "ColaPagoConfirmado";
         _log = log;
     }
 

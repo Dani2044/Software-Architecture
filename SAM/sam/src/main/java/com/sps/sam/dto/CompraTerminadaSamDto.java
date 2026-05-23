@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * DTO que representa el evento de compra finalizada recibido a traves
- * de la cola JMS {@code cola.sam}.
+ * de la cola JMS {@code ColaSAM}.
  *
  * <p>Este objeto es deserializado automaticamente por el convertidor Jackson
  * configurado en {@link com.sps.sam.config.JmsConfig}. Contiene la informacion

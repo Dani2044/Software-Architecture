@@ -13,9 +13,9 @@ public class PagoListener {
 
     private final CompraService compraService;
 
-    @JmsListener(destination = "${sps.cola.pago:cola.pago}")
+    @JmsListener(destination = "${sps.cola.pago:ColaPagoConfirmado}")
     public void onPago(PagoEvento evento) {
-        log.info("[cola.pago] Pago recibido compra={} valor={}",
+        log.info("[ColaPagoConfirmado] Pago recibido compra={} valor={}",
                 evento.getNumeroCompra(), evento.getValorPagado());
         compraService.marcarComoPagada(evento.getNumeroCompra(), evento.getValorPagado());
     }

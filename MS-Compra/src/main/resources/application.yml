@@ -29,9 +29,9 @@ spring:
 
 sps:
   cola:
-    pago: cola.pago
-    sam: cola.sam
-    shc: cola.shc
+    pago: ColaPagoConfirmado
+    sam: ColaSAM
+    shc: ColaSHC
 
 sns:
   base-url: ${SNS_URL:http://10.43.101.18:8090}

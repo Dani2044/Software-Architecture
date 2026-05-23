@@ -9,7 +9,7 @@ import { CompraPendiente, SaludPayService } from '../../services/saludpay.servic
  * Vista principal después del login. Muestra al usuario autenticado la lista
  * de sus compras pendientes y permite pagarlas individualmente. Cada pago
  * se procesa a través de {@link SaludPayService.pagar}, que envía la solicitud
- * al backend .NET; este publica un mensaje en la cola ActiveMQ `cola.pago`
+ * al backend .NET; este publica un mensaje en la cola ActiveMQ `ColaPagoConfirmado`
  * para que el micro-servicio SAM envíe un correo de confirmación.
  *
  * @remarks
@@ -103,7 +103,7 @@ export class PagoComponent implements OnInit {
    * Deshabilita los botones de pago durante la transacción para evitar
    * doble envío. Si el pago es exitoso, muestra un mensaje de confirmación
    * y recarga la lista de compras pendientes. El backend publica un mensaje
-   * en la cola ActiveMQ `cola.pago` para que SAM envíe el correo de confirmación.
+   * en la cola ActiveMQ `ColaPagoConfirmado` para que SAM envíe el correo de confirmación.
    *
    * @param c - Objeto {@link CompraPendiente} que representa la compra a pagar.
    */

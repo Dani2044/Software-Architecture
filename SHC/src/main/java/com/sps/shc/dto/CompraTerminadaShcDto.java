@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * DTO (Data Transfer Object) que representa el evento de compra terminada
- * recibido desde la cola JMS {@code cola.shc}.
+ * recibido desde la cola JMS {@code ColaSHC}.
  *
  * <p>Este objeto es deserializado automáticamente por el convertidor Jackson
  * configurado en {@link com.sps.shc.config.JmsConfig}. Contiene la información

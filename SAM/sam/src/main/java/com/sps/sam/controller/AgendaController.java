@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * <p>Nota: la escritura de datos no se realiza a traves de este controlador,
  * sino mediante el listener JMS {@link com.sps.sam.listener.SamListener}
- * que consume mensajes de la cola {@code cola.sam}.</p>
+ * que consume mensajes de la cola {@code ColaSAM}.</p>
  *
  * @author SPS Team
  * @see com.sps.sam.repository.AgendaServicioRepository
