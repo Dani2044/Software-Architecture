@@ -23,7 +23,7 @@ import java.util.Optional;
  * @version 1.0
  */
 @Repository
-public interface SolicitudAfiliacionRepository extends JpaRepository<SolicitudAfiliacion, Long> {
+public interface RepoSNS extends JpaRepository<SolicitudAfiliacion, Long> {
 
     /**
      * Busca una solicitud de afiliacion por el numero de documento del afiliado.

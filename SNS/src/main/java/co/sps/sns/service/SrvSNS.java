@@ -1,7 +1,7 @@
 package co.sps.sns.service;
 
 import co.sps.sns.model.SolicitudAfiliacion;
-import co.sps.sns.model.SolicitudAfiliacionRepository;
+import co.sps.sns.model.RepoSNS;
 import co.sps.sns.model.ValidacionAfiliado;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import java.util.Optional;
  *
  * <p>Contiene la logica central para validar afiliaciones al sistema de salud,
  * registrar nuevas solicitudes, consultarlas y actualizar su estado. Este servicio
- * es invocado por {@link co.sps.sns.controller.SnsController}.</p>
+ * es invocado por {@link co.sps.sns.controller.WSSNS}.</p>
  *
  * <p><b>Rol en la arquitectura:</b> Capa de servicio que implementa las reglas
  * de negocio del simulador SNS. MS-Compra consume este servicio de forma asincrona
@@ -32,18 +32,18 @@ import java.util.Optional;
  * @version 1.0
  */
 @Service
-public class SnsService {
+public class SrvSNS {
 
-    private static final Logger log = LoggerFactory.getLogger(SnsService.class);
+    private static final Logger log = LoggerFactory.getLogger(SrvSNS.class);
 
-    private final SolicitudAfiliacionRepository repository;
+    private final RepoSNS repository;
 
     /**
      * Constructor con inyeccion de dependencias.
      *
      * @param repository repositorio JPA para acceso a datos de solicitudes de afiliacion
      */
-    public SnsService(SolicitudAfiliacionRepository repository) {
+    public SrvSNS(RepoSNS repository) {
         this.repository = repository;
     }
 

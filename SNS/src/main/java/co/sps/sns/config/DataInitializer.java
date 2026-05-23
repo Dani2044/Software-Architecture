@@ -1,7 +1,11 @@
 package co.sps.sns.config;
 
+import co.sps.sns.model.Empresa;
+import co.sps.sns.model.PlanSalud;
 import co.sps.sns.model.SolicitudAfiliacion;
-import co.sps.sns.model.SolicitudAfiliacionRepository;
+import co.sps.sns.model.RepoSNS;
+import jakarta.persistence.EntityManager;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -27,15 +31,18 @@ public class DataInitializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
-    private final SolicitudAfiliacionRepository repository;
+    private final RepoSNS repository;
+    private final EntityManager entityManager;
 
     /**
      * Constructor con inyeccion de dependencias.
      *
      * @param repository repositorio JPA para persistir solicitudes de afiliacion
+     * @param entityManager entity manager para persistir entidades adicionales
      */
-    public DataInitializer(SolicitudAfiliacionRepository repository) {
+    public DataInitializer(RepoSNS repository, EntityManager entityManager) {
         this.repository = repository;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -48,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
      * @param args argumentos de linea de comandos (no utilizados)
      */
     @Override
+    @Transactional
     public void run(String... args) {
         // Si ya existen registros en la base de datos, no se vuelve a cargar
         if (repository.count() > 0) return;
@@ -63,7 +71,15 @@ public class DataInitializer implements CommandLineRunner {
         // Afiliado rechazado: simula estado RECHAZADO en validaciones
         crearAfiliado("6677889900", "CE", "Sofia Vargas",  "SURA",      SolicitudAfiliacion.EstadoSolicitud.RECHAZADA);
 
-        log.info("DataInitializer: {} afiliados de prueba cargados en H2.", repository.count());
+        // Empresas aseguradoras (EPS) registradas ante la SNS
+        entityManager.persist(new Empresa("800123456-1", "SURA EPS",      "ASEG001"));
+        entityManager.persist(new Empresa("800654321-2", "COMPENSAR EPS", "ASEG002"));
+
+        // Planes de salud catalogados por la SNS
+        entityManager.persist(new PlanSalud("PLAN-BASICO",   "Plan Basico de Salud",   "ASEG001"));
+        entityManager.persist(new PlanSalud("PLAN-PREMIUM",  "Plan Premium de Salud",  "ASEG001"));
+
+        log.info("DataInitializer: {} afiliados, 2 empresas y 2 planes cargados.", repository.count());
     }
 
     /**

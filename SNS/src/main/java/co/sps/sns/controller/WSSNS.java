@@ -2,7 +2,7 @@ package co.sps.sns.controller;
 
 import co.sps.sns.model.SolicitudAfiliacion;
 import co.sps.sns.model.ValidacionAfiliado;
-import co.sps.sns.service.SnsService;
+import co.sps.sns.service.SrvSNS;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,16 +31,16 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/sns")
-public class SnsController {
+public class WSSNS {
 
-    private final SnsService snsService;
+    private final SrvSNS snsService;
 
     /**
      * Constructor con inyeccion de dependencias.
      *
      * @param snsService servicio de logica de negocio del SNS
      */
-    public SnsController(SnsService snsService) {
+    public WSSNS(SrvSNS snsService) {
         this.snsService = snsService;
     }
 
