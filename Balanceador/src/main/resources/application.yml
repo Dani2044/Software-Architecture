@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8080
 
 spring:
   application:
@@ -9,10 +9,10 @@ spring:
   webflux:
     base-path: /
   datasource:
-    url: jdbc:mysql://10.43.101.18:3306/sps_balanceador?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql-balanceador:3306/sps_balanceador_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: sps_user
-    password: sps_pass_CAMBIAR
+    username: root
+    password: ${DB_PASS:root}
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,9 +21,8 @@ spring:
 
 balanceador:
   backends:
-    - http://10.43.100.111:8082
-    - http://10.43.99.121:8082
-    - http://10.43.99.121:8083
+    - http://10.43.100.111:8081
+    - http://10.43.99.121:8081
   healthcheck:
     interval-ms: 15000
 
