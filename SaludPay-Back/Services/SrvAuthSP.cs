@@ -3,16 +3,16 @@ using SaludPay.Api.Models;
 
 namespace SaludPay.Api.Services;
 
-public interface IAuthService
+public interface ISrvAuthSP
 {
     Usuario? Login(string cedula, string password);
 }
 
-public class AuthService : IAuthService
+public class SrvAuthSP : ISrvAuthSP
 {
     private readonly SaludPayDbContext _db;
 
-    public AuthService(SaludPayDbContext db) => _db = db;
+    public SrvAuthSP(SaludPayDbContext db) => _db = db;
 
     public Usuario? Login(string cedula, string password)
     {

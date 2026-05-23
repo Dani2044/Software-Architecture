@@ -19,9 +19,9 @@ builder.Services.AddDbContext<SaludPayDbContext>(o => o.UseSqlServer(connectionS
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
-builder.Services.AddSingleton<IPagoPublisher, ActiveMqPagoPublisher>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IPagoService, PagoService>();
+builder.Services.AddSingleton<IPagoPublisher, IntegraConfirmacion>();
+builder.Services.AddScoped<IAuthService, SrvAuthSP>();
+builder.Services.AddScoped<IPagoService, SrvPagosSP>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

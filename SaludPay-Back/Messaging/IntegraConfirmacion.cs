@@ -16,15 +16,15 @@ public record PagoMessage(string Cedula, long NumeroCompra, decimal ValorPagado,
 /// Compatible con spring-boot-starter-activemq del lado MS-Compra:
 /// el converter Jackson de Spring lee TextMessage JSON y deserializa al tipo destino.
 /// </summary>
-public class ActiveMqPagoPublisher : IPagoPublisher
+public class IntegraConfirmacion : IPagoPublisher
 {
     private readonly string _brokerUri;
     private readonly string _user;
     private readonly string _pass;
     private readonly string _cola;
-    private readonly ILogger<ActiveMqPagoPublisher> _log;
+    private readonly ILogger<IntegraConfirmacion> _log;
 
-    public ActiveMqPagoPublisher(IConfiguration cfg, ILogger<ActiveMqPagoPublisher> log)
+    public IntegraConfirmacion(IConfiguration cfg, ILogger<IntegraConfirmacion> log)
     {
         // Conversion del esquema Spring tcp://host:port -> NMS activemq:tcp://host:port
         var url = Environment.GetEnvironmentVariable("ACTIVEMQ_URL")

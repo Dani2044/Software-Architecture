@@ -4,18 +4,18 @@ using SaludPay.Api.Models;
 
 namespace SaludPay.Api.Services;
 
-public interface IPagoService
+public interface ISrvPagosSP
 {
     bool RegistrarPago(string cedula, long numeroCompra, decimal valorPagado);
 }
 
-public class PagoService : IPagoService
+public class SrvPagosSP : ISrvPagosSP
 {
     private readonly SaludPayDbContext _db;
     private readonly IPagoPublisher _publisher;
-    private readonly ILogger<PagoService> _log;
+    private readonly ILogger<SrvPagosSP> _log;
 
-    public PagoService(SaludPayDbContext db, IPagoPublisher publisher, ILogger<PagoService> log)
+    public SrvPagosSP(SaludPayDbContext db, IPagoPublisher publisher, ILogger<SrvPagosSP> log)
     {
         _db = db; _publisher = publisher; _log = log;
     }
