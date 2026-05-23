@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,22 +30,20 @@ public class EmailClient {
     private String urlPago;
 
     public void enviarCorreoAprobacion(String correo, Long numeroCompra, BigDecimal valor) {
-        var payload = Map.of(
-                "tipo", "APROBACION_SNS",
-                "destinatario", correo,
-                "numeroCompra", numeroCompra,
-                "valor", valor,
-                "urlPago", urlPago
-        );
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("tipo", "APROBACION_SNS");
+        payload.put("destinatario", correo);
+        payload.put("numeroCompra", numeroCompra);
+        payload.put("valor", valor);
+        payload.put("urlPago", urlPago);
         enviar(payload);
     }
 
     public void enviarCorreoCompraTerminada(String correo, Long numeroCompra) {
-        var payload = Map.of(
-                "tipo", "COMPRA_TERMINADA",
-                "destinatario", correo,
-                "numeroCompra", numeroCompra
-        );
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("tipo", "COMPRA_TERMINADA");
+        payload.put("destinatario", correo);
+        payload.put("numeroCompra", numeroCompra);
         enviar(payload);
     }
 
