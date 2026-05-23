@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ProxyWeb } from './proxy-web.service';
 
 /**
  * Respuesta del endpoint de autenticacion `/api/auth/login`.
@@ -24,29 +24,30 @@ export interface LoginResponse {
 }
 
 /**
- * Servicio de autenticacion basado en JWT.
+ * Servicio de eventos de autenticacion de la capa web.
  *
  * Se comunica con el microservicio MS-Auth-Catalogo ({@link environment.authCatalogoUrl})
- * para validar las credenciales del usuario. Tras un login exitoso, almacena el
- * token y los datos del usuario en `localStorage` bajo el prefijo `sps.*`.
+ * a traves del {@link ProxyWeb} para validar las credenciales del usuario.
+ * Tras un login exitoso, almacena el token y los datos del usuario en
+ * `localStorage` bajo el prefijo `sps.*`.
  *
  * Provee accesores de solo lectura para recuperar los datos de sesion y un
  * metodo {@link logout} para limpiar toda la informacion almacenada.
  *
  * @example
  * ```ts
- * this.authService.login('juan', 'juan123').subscribe({
- *   next: () => console.log('Autenticado:', this.authService.nombre),
+ * this.eventosAuth.login('juan', 'juan123').subscribe({
+ *   next: () => console.log('Autenticado:', this.eventosAuth.nombre),
  *   error: err => console.error(err)
  * });
  * ```
  */
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class EventosAuthW {
   /**
-   * @param http - Cliente HTTP de Angular para realizar peticiones al backend.
+   * @param proxy - Proxy HTTP generico para realizar peticiones al backend.
    */
-  constructor(private http: HttpClient) {}
+  constructor(private proxy: ProxyWeb) {}
 
   /**
    * Autentica al usuario contra el servicio de autenticacion.
@@ -60,7 +61,7 @@ export class AuthService {
    * @returns Observable que emite un {@link LoginResponse} con el token y datos del usuario.
    */
   login(username: string, password: string): Observable<LoginResponse> {
-    return this.http
+    return this.proxy
       .post<LoginResponse>(`${environment.authCatalogoUrl}/api/auth/login`, { username, password })
       .pipe(tap(res => {
         localStorage.setItem('sps.token', res.token);

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { CompraService } from '../../services/compra.service';
+import { EventosUIW } from '../../services/eventos-ui-w.service';
 
 /**
  * Componente de espera que muestra el estado de procesamiento de una compra.
@@ -9,7 +9,7 @@ import { CompraService } from '../../services/compra.service';
  * Tras confirmar una compra, el usuario es redirigido a esta pantalla donde
  * se muestra el numero de compra y su estado actual. El componente realiza
  * polling automatico cada {@link intervalo} segundos (por defecto 5) al
- * endpoint de consulta de estado del {@link CompraService}.
+ * endpoint de consulta de estado del {@link EventosUIW}.
  *
  * La compra pasa por varios estados (ej. `CREADA`, `APROBADA`, `RECHAZADA`)
  * a medida que la SNS (Superintendencia Nacional de Salud) procesa la solicitud.
@@ -49,9 +49,9 @@ export class EsperandoComponent implements OnInit, OnDestroy {
 
   /**
    * @param route - Ruta activa de Angular para extraer el parametro `numeroCompra`.
-   * @param service - Servicio de compras para consultar el estado de la compra.
+   * @param service - Servicio de eventos de UI para consultar el estado de la compra.
    */
-  constructor(private route: ActivatedRoute, private service: CompraService) {}
+  constructor(private route: ActivatedRoute, private service: EventosUIW) {}
 
   /**
    * Inicializa el componente extrayendo el numero de compra de la URL
@@ -80,7 +80,7 @@ export class EsperandoComponent implements OnInit, OnDestroy {
   /**
    * Realiza una consulta al backend para obtener el estado actual de la compra.
    *
-   * Llama a {@link CompraService.consultarEstado} con el {@link numeroCompra}
+   * Llama a {@link EventosUIW.consultarEstado} con el {@link numeroCompra}
    * y actualiza la propiedad {@link estado} con el valor recibido. Los errores
    * de red se ignoran silenciosamente para que el polling continue en la
    * siguiente iteracion.

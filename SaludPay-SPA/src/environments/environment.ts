@@ -15,7 +15,7 @@ export const environment = {
 
   /**
    * URL base del backend SaludPay-Back (.NET 8) que escucha en el puerto 5000.
-   * Todos los llamados HTTP del {@link SaludPayService} se construyen a partir de esta URL.
+   * Todos los llamados HTTP del {@link ProxyPagosSP} se construyen a partir de esta URL.
    */
   saludPayUrl: 'http://10.32.100.111:5000'
 };

@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CompraPendiente, SaludPayService } from '../../services/saludpay.service';
+import { CompraPendiente, EventosTransaccion } from '../../services/eventos-transaccion.service';
+import { EventosLoginSP } from '../../services/eventos-login-sp.service';
 
 /**
- * Componente de pagos de SaludPay.
+ * Componente de transacciones de SaludPay.
  *
  * Vista principal después del login. Muestra al usuario autenticado la lista
  * de sus compras pendientes y permite pagarlas individualmente. Cada pago
- * se procesa a través de {@link SaludPayService.pagar}, que envía la solicitud
+ * se procesa a través de {@link EventosTransaccion.pagar}, que envía la solicitud
  * al backend .NET; este publica un mensaje en la cola ActiveMQ `ColaPagoConfirmado`
  * para que el micro-servicio SAM envíe un correo de confirmación.
  *
@@ -18,10 +19,10 @@ import { CompraPendiente, SaludPayService } from '../../services/saludpay.servic
  *   automáticamente a `/login`.
  * - Utiliza la nueva sintaxis de control de flujo de Angular 17 (`@if`, `@for`).
  *
- * @selector sp-pago
+ * @selector app-pantalla-transaccion
  */
 @Component({
-  selector: 'sp-pago',
+  selector: 'app-pantalla-transaccion',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -44,7 +45,7 @@ import { CompraPendiente, SaludPayService } from '../../services/saludpay.servic
     </div>
   `
 })
-export class PagoComponent implements OnInit {
+export class PantallaTransaccion implements OnInit {
   /** Lista de compras pendientes obtenidas del backend. */
   pendientes: CompraPendiente[] = [];
 
@@ -64,11 +65,16 @@ export class PagoComponent implements OnInit {
   nombre = '';
 
   /**
-   * Crea una instancia del componente de pagos.
-   * @param service - Servicio de SaludPay para consultar compras y procesar pagos.
+   * Crea una instancia del componente de transacciones.
+   * @param servicioTransaccion - Servicio de transacciones para consultar compras y procesar pagos.
+   * @param servicioLogin - Servicio de login para consultar la sesión activa.
    * @param router - Router de Angular para navegación programática.
    */
-  constructor(private service: SaludPayService, private router: Router) {}
+  constructor(
+    private servicioTransaccion: EventosTransaccion,
+    private servicioLogin: EventosLoginSP,
+    private router: Router
+  ) {}
 
   /**
    * Hook de inicialización del componente.
@@ -78,8 +84,8 @@ export class PagoComponent implements OnInit {
    * del usuario y solicita la lista de compras pendientes.
    */
   ngOnInit(): void {
-    if (!this.service.cedula) { this.router.navigate(['/login']); return; }
-    this.nombre = this.service.nombre || '';
+    if (!this.servicioLogin.cedula) { this.router.navigate(['/login']); return; }
+    this.nombre = this.servicioLogin.nombre || '';
     this.recargar();
   }
 
@@ -91,7 +97,7 @@ export class PagoComponent implements OnInit {
    */
   recargar(): void {
     this.cargando = true;
-    this.service.listarPendientes(this.service.cedula!).subscribe({
+    this.servicioTransaccion.listarPendientes(this.servicioLogin.cedula!).subscribe({
       next: list => { this.pendientes = list; this.cargando = false; },
       error: () => { this.error = 'No se pudieron cargar las compras'; this.cargando = false; }
     });
@@ -111,7 +117,7 @@ export class PagoComponent implements OnInit {
     this.pagando = true;
     this.mensaje = '';
     this.error = '';
-    this.service.pagar(this.service.cedula!, c.numeroCompra, c.valor).subscribe({
+    this.servicioTransaccion.pagar(this.servicioLogin.cedula!, c.numeroCompra, c.valor).subscribe({
       next: () => {
         this.mensaje = `Pago de la compra #${c.numeroCompra} registrado. Recibiras un correo de confirmacion.`;
         this.pagando = false;

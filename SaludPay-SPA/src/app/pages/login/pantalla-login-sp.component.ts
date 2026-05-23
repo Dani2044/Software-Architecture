@@ -2,15 +2,15 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { SaludPayService } from '../../services/saludpay.service';
+import { EventosLoginSP } from '../../services/eventos-login-sp.service';
 
 /**
  * Componente de inicio de sesión de SaludPay.
  *
  * Presenta un formulario donde el usuario ingresa su cédula (documento de
  * identidad colombiano) y contraseña. Al enviar el formulario se invoca
- * {@link SaludPayService.login}; si la autenticación es exitosa, el usuario
- * es redirigido a la vista de pagos (`/pago`). En caso de error, se muestra
+ * {@link EventosLoginSP.login}; si la autenticación es exitosa, el usuario
+ * es redirigido a la vista de transacciones (`/pago`). En caso de error, se muestra
  * un mensaje descriptivo debajo del formulario.
  *
  * @remarks
@@ -18,10 +18,10 @@ import { SaludPayService } from '../../services/saludpay.service';
  * - Las credenciales de prueba (seed) se muestran al pie del formulario:
  *   cédula `1000000001` / contraseña `juan123`.
  *
- * @selector sp-login
+ * @selector app-pantalla-login-sp
  */
 @Component({
-  selector: 'sp-login',
+  selector: 'app-pantalla-login-sp',
   standalone: true,
   imports: [FormsModule, CommonModule],
   template: `
@@ -37,7 +37,7 @@ import { SaludPayService } from '../../services/saludpay.service';
     </div>
   `
 })
-export class LoginComponent {
+export class PantallaLoginSP {
   /** Número de cédula ingresado por el usuario (enlazado al input con ngModel). */
   cedula = '';
 
@@ -49,16 +49,16 @@ export class LoginComponent {
 
   /**
    * Crea una instancia del componente de login.
-   * @param service - Servicio de SaludPay para autenticación y gestión de sesión.
+   * @param service - Servicio de eventos de login para autenticación y gestión de sesión.
    * @param router - Router de Angular para navegación programática.
    */
-  constructor(private service: SaludPayService, private router: Router) {}
+  constructor(private service: EventosLoginSP, private router: Router) {}
 
   /**
    * Maneja el envío del formulario de login.
    *
    * Previene el comportamiento por defecto del formulario, limpia errores
-   * previos y llama a {@link SaludPayService.login}. Si la autenticación
+   * previos y llama a {@link EventosLoginSP.login}. Si la autenticación
    * es exitosa, navega a `/pago`. Si falla, muestra el mensaje de error
    * retornado por el backend o un mensaje genérico.
    *

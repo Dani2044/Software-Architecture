@@ -1,21 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CompraService, Plan } from '../../services/compra.service';
+import { EventosCatalogoW, Plan } from '../../services/eventos-catalogo-w.service';
+import { EventosUIW } from '../../services/eventos-ui-w.service';
 
 /**
- * Componente del catalogo de planes de salud.
+ * Pantalla del catalogo de planes de salud.
  *
- * Al inicializarse, consulta el {@link CompraService} para obtener la lista
+ * Al inicializarse, consulta el {@link EventosCatalogoW} para obtener la lista
  * completa de planes disponibles y los presenta en un grid responsivo. Cada
  * tarjeta de plan muestra su nombre, descripcion, precio y servicios incluidos,
  * junto con un boton para agregarlo al carrito de compras.
  *
- * El carrito se persiste en `localStorage` bajo la clave `sps.carrito`,
- * evitando duplicados por codigo de plan.
+ * El carrito se gestiona a traves de {@link EventosUIW}, que persiste los datos
+ * en `localStorage` bajo la clave `sps.carrito`, evitando duplicados por codigo
+ * de plan.
  */
 @Component({
-  selector: 'app-catalogo',
+  selector: 'app-pantalla-catalogo-w',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -39,7 +41,7 @@ import { CompraService, Plan } from '../../services/compra.service';
     </div>
   `
 })
-export class CatalogoComponent implements OnInit {
+export class PantallaCatalogoW implements OnInit {
   /** Lista de planes de salud obtenidos del catalogo. */
   planes: Plan[] = [];
 
@@ -50,10 +52,15 @@ export class CatalogoComponent implements OnInit {
   error = '';
 
   /**
-   * @param service - Servicio de compras para consultar el catalogo de planes.
+   * @param catalogo - Servicio de eventos del catalogo para consultar los planes disponibles.
+   * @param uiService - Servicio de eventos de UI para gestionar el carrito de compras.
    * @param router - Router de Angular para navegar al carrito tras agregar un plan.
    */
-  constructor(private service: CompraService, private router: Router) {}
+  constructor(
+    private catalogo: EventosCatalogoW,
+    private uiService: EventosUIW,
+    private router: Router
+  ) {}
 
   /**
    * Inicializa el componente cargando la lista de planes desde el backend.
@@ -64,7 +71,7 @@ export class CatalogoComponent implements OnInit {
    */
   ngOnInit(): void {
     this.loading = true;
-    this.service.listarPlanes().subscribe({
+    this.catalogo.listarPlanes().subscribe({
       next: p => { this.planes = p; this.loading = false; },
       error: err => { this.error = 'No se pudo cargar el catalogo'; this.loading = false; }
     });
@@ -73,16 +80,13 @@ export class CatalogoComponent implements OnInit {
   /**
    * Agrega un plan de salud al carrito de compras.
    *
-   * Lee el carrito actual desde `localStorage`, verifica que el plan no
-   * exista ya (comparando por {@link Plan.codigo}), lo agrega si es nuevo
+   * Delega al {@link EventosUIW} la persistencia del plan en `localStorage`
    * y redirige al usuario a la pagina del carrito.
    *
    * @param p - Plan de salud a agregar al carrito.
    */
   agregar(p: Plan): void {
-    const carrito: Plan[] = JSON.parse(localStorage.getItem('sps.carrito') || '[]');
-    if (!carrito.find(x => x.codigo === p.codigo)) carrito.push(p);
-    localStorage.setItem('sps.carrito', JSON.stringify(carrito));
+    this.uiService.agregarAlCarrito(p);
     this.router.navigate(['/carrito']);
   }
 }

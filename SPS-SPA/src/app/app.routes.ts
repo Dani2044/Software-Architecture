@@ -9,15 +9,15 @@ import { Routes } from '@angular/router';
  * | Ruta                          | Componente            | Descripcion                                      |
  * |-------------------------------|-----------------------|--------------------------------------------------|
  * | `/`                           | —                     | Redirige automaticamente a `/login`.             |
- * | `/login`                      | `LoginComponent`      | Formulario de inicio de sesion (JWT).            |
- * | `/catalogo`                   | `CatalogoComponent`   | Listado de planes de salud disponibles.          |
- * | `/carrito`                    | `CarritoComponent`    | Resumen y confirmacion de compra.                |
+ * | `/login`                      | `PantallaAuthW`       | Formulario de inicio de sesion (JWT).            |
+ * | `/catalogo`                   | `PantallaCatalogoW`   | Listado de planes de salud disponibles.          |
+ * | `/carrito`                    | `PantallaCompraW`     | Resumen y confirmacion de compra.                |
  * | `/esperando/:numeroCompra`    | `EsperandoComponent`  | Pantalla de espera con polling de estado.         |
  */
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
-  { path: 'catalogo', loadComponent: () => import('./pages/catalogo/catalogo.component').then(m => m.CatalogoComponent) },
-  { path: 'carrito', loadComponent: () => import('./pages/carrito/carrito.component').then(m => m.CarritoComponent) },
+  { path: 'login', loadComponent: () => import('./pages/auth/pantalla-auth-w.component').then(m => m.PantallaAuthW) },
+  { path: 'catalogo', loadComponent: () => import('./pages/catalogo/pantalla-catalogo-w.component').then(m => m.PantallaCatalogoW) },
+  { path: 'carrito', loadComponent: () => import('./pages/compra/pantalla-compra-w.component').then(m => m.PantallaCompraW) },
   { path: 'esperando/:numeroCompra', loadComponent: () => import('./pages/esperando/esperando.component').then(m => m.EsperandoComponent) }
 ];

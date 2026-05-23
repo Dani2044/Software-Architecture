@@ -2,13 +2,13 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { EventosAuthW } from '../../services/eventos-auth-w.service';
 
 /**
- * Componente de inicio de sesion de la aplicacion SPS.
+ * Pantalla de autenticacion de la aplicacion SPS.
  *
  * Presenta un formulario con campos de usuario y contrasena. Al enviar el
- * formulario, delega la autenticacion al {@link AuthService} que valida las
+ * formulario, delega la autenticacion al {@link EventosAuthW} que valida las
  * credenciales contra el microservicio de autenticacion via JWT.
  *
  * - En caso de exito, redirige al usuario a la pagina de catalogo (`/catalogo`).
@@ -18,7 +18,7 @@ import { AuthService } from '../../services/auth.service';
  * bidireccional con `ngModel`.
  */
 @Component({
-  selector: 'app-login',
+  selector: 'app-pantalla-auth-w',
   standalone: true,
   imports: [FormsModule, CommonModule],
   template: `
@@ -34,7 +34,7 @@ import { AuthService } from '../../services/auth.service';
     </div>
   `
 })
-export class LoginComponent {
+export class PantallaAuthW {
   /** Nombre de usuario ingresado en el formulario. */
   username = '';
 
@@ -45,10 +45,10 @@ export class LoginComponent {
   error = '';
 
   /**
-   * @param auth - Servicio de autenticacion para validar credenciales y gestionar la sesion.
+   * @param auth - Servicio de eventos de autenticacion para validar credenciales y gestionar la sesion.
    * @param router - Router de Angular para redirigir tras un login exitoso.
    */
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: EventosAuthW, private router: Router) {}
 
   /**
    * Maneja el envio del formulario de login.
