@@ -1,18 +1,41 @@
 server:
-  port: 8081
+  port: 8086
 
 spring:
   application:
     name: sam
 
   datasource:
-    url: jdbc:mysql://localhost:3309/sps_sam_db
+    url: jdbc:mysql://${DB_HOST:mysql-sam}:3306/sps_sam_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password: root
+    password: ${DB_PASS:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
+
+  activemq:
+    broker-url: ${ACTIVEMQ_URL:tcp://10.43.100.111:61616}
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASS:admin}
+    packages:
+      trust-all: true
+  jms:
+    pub-sub-domain: false
+
+sps:
+  cola:
+    sam: cola.sam
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    "[com.sps.sam]": INFO
