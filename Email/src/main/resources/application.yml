@@ -18,7 +18,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
-    port: 587
+    port: ${MAIL_PORT:587}
     username: ${MAIL_USER}
     password: ${MAIL_PASS}
     properties:
