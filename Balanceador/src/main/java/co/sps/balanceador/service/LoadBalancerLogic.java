@@ -69,6 +69,51 @@ public class LoadBalancerLogic {
         );
     }
 
+    /**
+     * Reenvia un GET a un backend fijo (sin round-robin).
+     * Usado para rutas que van siempre al mismo microservicio (auth, catalogo).
+     */
+    public Mono<String> getDirect(String baseUrl, String path) {
+        log.info("Forwarding GET {} -> {}{}", path, baseUrl, path);
+        logService.registrar("REQUEST", "GET", baseUrl, path, "Solicitud enviada (direct)");
+
+        return webClientBuilder.baseUrl(baseUrl).build()
+                .get()
+                .uri(path)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(10))
+                .doOnSuccess(body ->
+                    logService.registrar("RESPONSE", "GET", baseUrl, path, "Respuesta exitosa")
+                )
+                .doOnError(error ->
+                    logService.registrar("ERROR", "GET", baseUrl, path, error.getMessage())
+                );
+    }
+
+    /**
+     * Reenvia un POST a un backend fijo (sin round-robin).
+     * Usado para rutas que van siempre al mismo microservicio (auth, catalogo).
+     */
+    public Mono<String> postDirect(String baseUrl, String path, Object body) {
+        log.info("Forwarding POST {} -> {}{}", path, baseUrl, path);
+        logService.registrar("REQUEST", "POST", baseUrl, path, "Solicitud enviada (direct)");
+
+        return webClientBuilder.baseUrl(baseUrl).build()
+                .post()
+                .uri(path)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(30))
+                .doOnSuccess(res ->
+                    logService.registrar("RESPONSE", "POST", baseUrl, path, "Respuesta exitosa")
+                )
+                .doOnError(error ->
+                    logService.registrar("ERROR", "POST", baseUrl, path, error.getMessage())
+                );
+    }
+
     public Mono<String> post(String path, Object body) {
         return Mono.defer(() -> {
             String base = nextBackend();

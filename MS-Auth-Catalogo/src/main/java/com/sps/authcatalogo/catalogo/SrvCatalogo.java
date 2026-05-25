@@ -9,12 +9,12 @@ import java.util.Optional;
 /**
  * Servicio de catalogo que encapsula la logica de consulta de planes y servicios medicos.
  *
- * <p>Extrae la logica de negocio que anteriormente residia en {@link CatalogoController},
- * delegando el acceso a datos a {@link RepoCatalogo} y {@link ServicioMedicoRepository}.</p>
+ * <p>Extrae la logica de negocio delegando el acceso a datos a {@link RepoCatalogo}
+ * y {@link ServicioMedicoRepository}. Es invocado por {@link ProxyCatalogo}.</p>
  *
  * @see RepoCatalogo
  * @see ServicioMedicoRepository
- * @see CatalogoController
+ * @see ProxyCatalogo
  */
 @Service
 @RequiredArgsConstructor

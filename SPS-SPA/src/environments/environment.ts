@@ -21,7 +21,7 @@ export const environment = {
    * URL directa al microservicio de autenticacion y catalogo (puerto 8082).
    * Se usa para login JWT y para obtener la lista de planes de salud.
    */
-  authCatalogoUrl: 'http://10.43.101.18:8082',
+  authCatalogoUrl: 'http://10.43.101.18:8080',
 
   /**
    * URL del SaludPay-SPA (puerto 4201) — pantalla de pago.

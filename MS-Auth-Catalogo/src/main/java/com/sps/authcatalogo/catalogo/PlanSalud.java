@@ -23,7 +23,7 @@ import java.util.List;
  * completa de servicios de cada plan en una sola consulta.</p>
  *
  * @see ServicioMedico
- * @see CatalogoController#planes()
+ * @see ProxyCatalogo#planes()
  */
 @Entity
 @Table(name = "plan")
