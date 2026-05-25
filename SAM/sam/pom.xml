@@ -44,10 +44,10 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ACTIVEMQ (JMS clasico, compatible con apache/activemq-classic) -->
+        <!-- AMQP (RabbitMQ, patron Spring AMQP con @RabbitListener) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-activemq</artifactId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
         <!-- LOMBOK -->

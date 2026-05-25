@@ -17,14 +17,12 @@ spring:
     show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
 
-  activemq:
-    broker-url: ${ACTIVEMQ_URL:tcp://10.43.100.122:61616}
-    user: ${ACTIVEMQ_USER:admin}
-    password: ${ACTIVEMQ_PASS:admin}
-    packages:
-      trust-all: true
-  jms:
-    pub-sub-domain: false
+  rabbitmq:
+    host: ${RABBITMQ_HOST:10.43.100.122}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASS:admin123}
+    virtual-host: /
 
 sps:
   cola:
