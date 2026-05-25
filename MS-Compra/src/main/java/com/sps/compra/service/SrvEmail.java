@@ -26,7 +26,7 @@ public class SrvEmail {
 
     public void enviarCorreoAprobacion(String correo, Long numeroCompra, BigDecimal valor) {
         Map<String, Object> payload = new HashMap<>();
-        payload.put("tipo", "APROBACION_SNS");
+        payload.put("tipo", "COMPRA_APROBADA_SNS");
         payload.put("destinatario", correo);
         payload.put("numeroCompra", numeroCompra);
         payload.put("valor", valor);
@@ -36,7 +36,7 @@ public class SrvEmail {
 
     public void enviarCorreoCompraTerminada(String correo, Long numeroCompra) {
         Map<String, Object> payload = new HashMap<>();
-        payload.put("tipo", "COMPRA_TERMINADA");
+        payload.put("tipo", "COMPRA_COMPLETADA");
         payload.put("destinatario", correo);
         payload.put("numeroCompra", numeroCompra);
         adapterEmail.enviar(payload);
