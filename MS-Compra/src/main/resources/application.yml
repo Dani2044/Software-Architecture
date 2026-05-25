@@ -41,10 +41,10 @@ sns:
 
 email:
   base-url: ${EMAIL_URL:http://10.43.101.18:8084}
-  sps-url-pago: ${SPS_URL_PAGO:http://10.32.100.111:4201/pago}
+  sps-url-pago: ${SPS_URL_PAGO:http://10.43.100.111:4201/pago}
 
 saludpay:
-  base-url: ${SALUD_PAY_URL:http://10.32.100.111:5000}
+  base-url: ${SALUD_PAY_URL:http://10.43.100.111:5000}
 
 management:
   endpoints:

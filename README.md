@@ -25,7 +25,7 @@ SPS es una solución empresarial distribuida para la adquisición de planes de s
 | Integrante | IP | Motor | Componentes |
 | --- | --- | --- | --- |
 | **Daniel Castro** | `10.43.101.18` | Docker Engine | Balanceador · SNS · MS-Auth-Catalogo · Email |
-| **Mapa Rodríguez** | `10.32.100.111` | Kestrel (.NET) + Docker | SPS-SPA · SaludPay-Back · SaludPay-SPA |
+| **Mapa Rodríguez** | `10.43.100.111` | Kestrel (.NET) + Docker | SPS-SPA · SaludPay-Back · SaludPay-SPA |
 | **Katheryn Guasca** | `10.43.99.121` | Docker Engine | MS-Compra (réplica) · SAM · SHC |
 | **Juan Rozo** | `10.43.100.122` | Docker Engine | MS-Compra (maestro) · ActiveMQ |
 
@@ -104,12 +104,12 @@ COMPOSE_PROFILES=kath docker compose up -d --build
 # SHC:        http://10.43.99.121:8087/api/shc/health
 ```
 
-### Mapa (10.32.100.111) — SaludPay-Back + SPAs
+### Mapa (10.43.100.111) — SaludPay-Back + SPAs
 ```bash
 COMPOSE_PROFILES=mapa docker compose up -d --build
-# SaludPay-Back:  http://10.32.100.111:5000/api/saludpay/health
-# SPS-SPA:        http://10.32.100.111:4200
-# SaludPay-SPA:   http://10.32.100.111:4201
+# SaludPay-Back:  http://10.43.100.111:5000/api/saludpay/health
+# SPS-SPA:        http://10.43.100.111:4200
+# SaludPay-SPA:   http://10.43.100.111:4201
 ```
 
 Si Mapa prefiere correr `SaludPay-Back` con Kestrel directamente (sin contenedor):

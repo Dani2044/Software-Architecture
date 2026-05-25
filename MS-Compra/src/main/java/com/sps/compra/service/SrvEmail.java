@@ -21,7 +21,7 @@ public class SrvEmail {
 
     private final AdapterEmail adapterEmail;
 
-    @Value("${email.sps-url-pago:http://10.32.100.111:4201/pago}")
+    @Value("${email.sps-url-pago:http://10.43.100.111:4201/pago}")
     private String urlPago;
 
     public void enviarCorreoAprobacion(String correo, Long numeroCompra, BigDecimal valor) {

@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment';
  *
  * Encapsula el {@link HttpClient} de Angular y expone métodos genéricos
  * `get` y `post` que anteponen automáticamente la URL base del backend
- * (`http://10.32.100.111:5000`) a cada petición.
+ * (`http://10.43.100.111:5000`) a cada petición.
  *
  * Este servicio actúa como capa de abstracción (patrón Proxy) entre los
  * servicios de dominio ({@link EventosLoginSP}, {@link EventosTransaccion})

@@ -6,7 +6,7 @@
 #   Juan    (10.43.100.122): COMPOSE_PROFILES=juan   docker compose up -d --build
 #   Daniel  (10.43.101.18):  COMPOSE_PROFILES=daniel docker compose up -d --build
 #   Kath    (10.43.99.121):  COMPOSE_PROFILES=kath   docker compose up -d --build
-#   Mapa    (10.32.100.111): COMPOSE_PROFILES=mapa   docker compose up -d --build
+#   Mapa    (10.43.100.111): COMPOSE_PROFILES=mapa   docker compose up -d --build
 #
 # Variables sensibles en .env (copiar de .env.example y completar).
 # ============================================================================
@@ -234,7 +234,7 @@ services:
     restart: unless-stopped
 
   # ==========================================================================
-  # PERFIL MAPA (10.32.100.111) - SaludPay (.NET + SPA) + SPS-SPA
+  # PERFIL MAPA (10.43.100.111) - SaludPay (.NET + SPA) + SPS-SPA
   # NOTA: el enunciado pide .NET en Kestrel "fuera de IDE". Si Mapa prefiere
   # correrlo dockerizado, este perfil lo construye; si no, puede lanzar
   # SaludPay-Back con `dotnet run` directamente.
