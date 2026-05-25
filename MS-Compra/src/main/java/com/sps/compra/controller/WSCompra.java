@@ -32,8 +32,11 @@ public class WSCompra {
     }
 
     @GetMapping("/{id}")
-    public Compra detalle(@PathVariable Long id) {
-        return repoCompra.findById(id).orElseThrow();
+    public ResponseEntity<?> detalle(@PathVariable Long id) {
+        return repoCompra.findById(id)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(404)
+                        .body(Map.of("error", "Compra no encontrada", "id", id)));
     }
 
     @GetMapping("/cedula/{cedula}")

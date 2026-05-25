@@ -28,10 +28,12 @@ services:
       - "8161:8161"     # Consola web admin
     restart: unless-stopped
 
+  # MySQL compartido entre las 2 replicas de MS-Compra
+  # Solo Juan (maestro) lo corre; Kath (replica) se conecta remotamente vía IP+puerto 3308.
   mysql-compra:
     image: mysql:8.0
     container_name: mysql-compra
-    profiles: ["juan", "kath"]
+    profiles: ["juan"]
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: sps_compra_db
@@ -45,10 +47,11 @@ services:
     build: ./MS-Compra
     container_name: ms-compra
     profiles: ["juan", "kath"]
-    depends_on:
-      - mysql-compra
     environment:
-      DB_HOST: mysql-compra
+      # Juan apunta al contenedor local mysql-compra (puerto 3306 interno).
+      # Kath sobrescribe en su .env con: DB_HOST=10.43.100.122 y DB_PORT=3308.
+      DB_HOST: ${DB_HOST:-mysql-compra}
+      DB_PORT: ${DB_PORT:-3306}
       DB_PASS: ${DB_PASS}
       ACTIVEMQ_URL: ${ACTIVEMQ_URL}
       ACTIVEMQ_USER: ${ACTIVEMQ_USER}
