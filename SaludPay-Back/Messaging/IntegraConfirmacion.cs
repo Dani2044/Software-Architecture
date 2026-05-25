@@ -1,6 +1,6 @@
+using System.Text;
 using System.Text.Json;
-using Apache.NMS;
-using Apache.NMS.ActiveMQ;
+using RabbitMQ.Client;
 
 namespace SaludPay.Api.Messaging;
 
@@ -12,13 +12,15 @@ public interface IPagoPublisher
 public record PagoMessage(string Cedula, long NumeroCompra, decimal ValorPagado, DateTime FechaPago);
 
 /// <summary>
-/// Publica mensajes a ColaPagoConfirmado en ActiveMQ.
-/// Compatible con spring-boot-starter-activemq del lado MS-Compra:
-/// el converter Jackson de Spring lee TextMessage JSON y deserializa al tipo destino.
+/// Publica mensajes a ColaPagoConfirmado en RabbitMQ.
+/// Compatible con spring-boot-starter-amqp del lado MS-Compra:
+/// el Jackson2JsonMessageConverter de Spring AMQP lee el JSON del body
+/// y usa el header __TypeId__ para resolver el POJO destino via DefaultClassMapper.
 /// </summary>
 public class IntegraConfirmacion : IPagoPublisher
 {
-    private readonly string _brokerUri;
+    private readonly string _host;
+    private readonly int _port;
     private readonly string _user;
     private readonly string _pass;
     private readonly string _cola;
@@ -26,14 +28,11 @@ public class IntegraConfirmacion : IPagoPublisher
 
     public IntegraConfirmacion(IConfiguration cfg, ILogger<IntegraConfirmacion> log)
     {
-        // Conversion del esquema Spring tcp://host:port -> NMS activemq:tcp://host:port
-        var url = Environment.GetEnvironmentVariable("ACTIVEMQ_URL")
-                  ?? cfg["ActiveMq:Url"]
-                  ?? "tcp://10.43.100.122:61616";
-        _brokerUri = $"activemq:{url}";
-        _user = Environment.GetEnvironmentVariable("ACTIVEMQ_USER") ?? "admin";
-        _pass = Environment.GetEnvironmentVariable("ACTIVEMQ_PASS") ?? "admin";
-        _cola = cfg["ActiveMq:ColaPago"] ?? "ColaPagoConfirmado";
+        _host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "10.43.100.122";
+        _port = int.Parse(Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? "5672");
+        _user = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "admin";
+        _pass = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? "admin123";
+        _cola = cfg["RabbitMq:ColaPago"] ?? "ColaPagoConfirmado";
         _log = log;
     }
 
@@ -41,27 +40,54 @@ public class IntegraConfirmacion : IPagoPublisher
     {
         try
         {
-            var factory = new ConnectionFactory(_brokerUri);
-            using var connection = factory.CreateConnection(_user, _pass);
-            connection.Start();
-            using var session = connection.CreateSession();
-            var dest = session.GetQueue(_cola);
-            using var producer = session.CreateProducer(dest);
-            producer.DeliveryMode = MsgDeliveryMode.Persistent;
+            var factory = new ConnectionFactory
+            {
+                HostName = _host,
+                Port = _port,
+                UserName = _user,
+                Password = _pass
+            };
 
-            var msg = session.CreateTextMessage(JsonSerializer.Serialize(pago, new JsonSerializerOptions
+            using var connection = factory.CreateConnection();
+            using var channel = connection.CreateModel();
+
+            // Declara la cola como durable (idempotente si ya existe)
+            channel.QueueDeclare(
+                queue: _cola,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null
+            );
+
+            var props = channel.CreateBasicProperties();
+            props.Persistent = true;
+            props.ContentType = "application/json";
+            props.ContentEncoding = "UTF-8";
+            // Header __TypeId__ que Spring AMQP usa para resolver el POJO destino en MS-Compra
+            props.Headers = new Dictionary<string, object>
+            {
+                { "__TypeId__", "TransaccionPago" }
+            };
+
+            var json = JsonSerializer.Serialize(pago, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            }));
-            // Header que Spring Jackson usa para resolver el POJO destino
-            msg.Properties.SetString("_type", "com.sps.compra.messaging.TransaccionPago");
-            producer.Send(msg);
+            });
+            var body = Encoding.UTF8.GetBytes(json);
+
+            channel.BasicPublish(
+                exchange: "",
+                routingKey: _cola,
+                basicProperties: props,
+                body: body
+            );
 
             _log.LogInformation("Publicado en {cola} pago de compra {n}", _cola, pago.NumeroCompra);
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Error al publicar en ActiveMQ");
+            _log.LogError(ex, "Error al publicar en RabbitMQ");
             throw;
         }
     }
