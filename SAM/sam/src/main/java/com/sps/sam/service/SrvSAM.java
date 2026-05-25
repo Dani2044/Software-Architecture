@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  * adquiridos en la agenda del paciente.
  *
  * <p>Implementa un patron de <b>registro idempotente</b>: si un mensaje
- * de compra llega mas de una vez (reentrega por parte de ActiveMQ),
+ * de compra llega mas de una vez (reentrega por parte de RabbitMQ),
  * los servicios que ya fueron registrados se omiten sin generar error.
  * La idempotencia se garantiza a dos niveles:</p>
  * <ol>

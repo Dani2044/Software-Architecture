@@ -22,7 +22,7 @@ public interface ISrvPagosSP
 /// <para>Coordina el ciclo de vida de las compras pendientes y los pagos,
 /// usando <see cref="IRepoSP"/> para acceso a datos y
 /// <see cref="IPagoPublisher"/> (implementado por <c>IntegraConfirmacion</c>)
-/// para notificar a MS-Compra via ActiveMQ cuando un pago se completa.</para>
+/// para notificar a MS-Compra via RabbitMQ cuando un pago se completa.</para>
 /// </summary>
 public class SrvPagosSP : ISrvPagosSP
 {
