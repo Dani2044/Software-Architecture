@@ -23,7 +23,6 @@ balanceador:
   backends:
     - http://10.43.100.122:8081
     - http://10.43.99.121:8081
-  auth-catalogo-url: ${AUTH_CATALOGO_URL:http://10.43.101.18:8082}
   healthcheck:
     interval-ms: 15000
 

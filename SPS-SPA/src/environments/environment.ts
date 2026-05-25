@@ -1,27 +1,26 @@
 /**
- * Configuracion de entorno para desarrollo local.
+ * Configuracion de entorno para la SPA del sistema SPS.
  *
- * Define las URLs base de los servicios backend con los que se comunica la SPA:
- * - {@link environment.balanceadorUrl} — Balanceador de carga que distribuye las
- *   peticiones de compra entre las instancias disponibles de MS-Compra.
- * - {@link environment.authCatalogoUrl} — Servicio de autenticacion (JWT) y
- *   catalogo de planes de salud, accedido directamente durante desarrollo.
+ * <p>Segun el diagrama de despliegue UML, el SPA habla unicamente con los
+ * WebServices de {@code MS-Auth-Catalogo} a traves del {@code ProxyWeb}.
+ * Las operaciones de compra son reenviadas internamente por {@code ProxyCatalogo}
+ * al Balanceador del sistema. La SPA no conoce la IP del Balanceador.</p>
  */
 export const environment = {
   /** Indica si la aplicacion se ejecuta en modo produccion. */
   production: false,
 
   /**
-   * URL del balanceador de carga (puerto 8080).
-   * Todas las operaciones de compra se enrutan a traves de este endpoint.
+   * URL del microservicio MS-Auth-Catalogo (puerto 8082).
+   *
+   * <p>Este es el unico backend con el que la SPA se comunica:</p>
+   * <ul>
+   *   <li>{@code /api/auth/**}    — login y registro (AuthController).</li>
+   *   <li>{@code /api/catalogo/**}— planes y servicios (ProxyCatalogo, datos locales).</li>
+   *   <li>{@code /api/compra/**}  — crear/consultar compras (ProxyCatalogo reenvia al Balanceador).</li>
+   * </ul>
    */
-  balanceadorUrl: 'http://10.43.101.18:8080',
-
-  /**
-   * URL directa al microservicio de autenticacion y catalogo (puerto 8082).
-   * Se usa para login JWT y para obtener la lista de planes de salud.
-   */
-  authCatalogoUrl: 'http://10.43.101.18:8080',
+  authCatalogoUrl: 'http://10.43.101.18:8082',
 
   /**
    * URL del SaludPay-SPA (puerto 4201) — pantalla de pago.

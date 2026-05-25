@@ -40,14 +40,14 @@ export interface CrearCompraRequest {
  * Servicio de eventos de interfaz de usuario de la capa web.
  *
  * Gestiona el estado del carrito de compras en `localStorage` y se comunica
- * con el balanceador de carga ({@link environment.balanceadorUrl}) a traves
- * del {@link ProxyWeb} para crear y consultar compras.
+ * con {@link environment.authCatalogoUrl} (MS-Auth-Catalogo) a traves del
+ * {@link ProxyWeb} para crear y consultar compras. Es {@code ProxyCatalogo}
+ * dentro de MS-Auth-Catalogo el que reenvia internamente las peticiones de
+ * compra al Balanceador del sistema (round-robin sobre MS-Compra).
  *
  * Ofrece tres operaciones principales:
- * 1. {@link crearCompra} — Envia la solicitud de compra al balanceador de carga,
- *    que la distribuye a una instancia de MS-Compra.
- * 2. {@link consultarEstado} — Consulta el estado actual de una compra existente
- *    a traves del balanceador.
+ * 1. {@link crearCompra} — Envia la solicitud de compra a ProxyCatalogo.
+ * 2. {@link consultarEstado} — Consulta el estado actual de una compra existente.
  * 3. Gestion del carrito — {@link obtenerCarrito}, {@link agregarAlCarrito},
  *    {@link limpiarCarrito}.
  */
@@ -90,32 +90,34 @@ export class EventosUIW {
   // ── Compra (HTTP via ProxyWeb) ───────────────────────────────────────
 
   /**
-   * Crea una nueva solicitud de compra enviandola al balanceador de carga.
+   * Crea una nueva solicitud de compra.
    *
-   * El balanceador distribuye la peticion a una de las instancias activas de
-   * MS-Compra mediante round-robin. La compra inicia en estado `CREADA` y
-   * posteriormente sera procesada por la SNS (Superintendencia Nacional de Salud).
+   * La peticion se envia a {@code ProxyCatalogo} en MS-Auth-Catalogo, que la
+   * reenvia al Balanceador. El Balanceador a su vez distribuye la peticion a
+   * una de las instancias activas de MS-Compra mediante round-robin. La compra
+   * inicia en estado `CREADA` y posteriormente sera procesada por la SNS
+   * (Superintendencia Nacional de Salud).
    *
    * @param req - Datos de la compra incluyendo informacion del cliente y planes seleccionados.
    * @returns Observable con el numero de compra asignado, el estado inicial y un mensaje descriptivo.
    */
   crearCompra(req: CrearCompraRequest): Observable<{ numeroCompra: number; estado: string; mensaje: string }> {
     return this.proxy.post<{ numeroCompra: number; estado: string; mensaje: string }>(
-      `${environment.balanceadorUrl}/api/compra`, req
+      `${environment.authCatalogoUrl}/api/compra`, req
     );
   }
 
   /**
    * Consulta el estado actual de una compra existente.
    *
-   * Realiza una peticion GET al balanceador para obtener los detalles y el
-   * estado de procesamiento de la compra identificada por su numero.
-   * Los estados posibles incluyen: `CREADA`, `APROBADA`, `RECHAZADA`, entre otros.
+   * Realiza una peticion GET a ProxyCatalogo (MS-Auth-Catalogo), que la
+   * reenvia al Balanceador. Los estados posibles incluyen: `CREADA`, `APROBADA`,
+   * `RECHAZADA`, entre otros.
    *
    * @param numeroCompra - Numero unico de la compra a consultar.
    * @returns Observable con los datos actualizados de la compra.
    */
   consultarEstado(numeroCompra: number): Observable<any> {
-    return this.proxy.get(`${environment.balanceadorUrl}/api/compra/${numeroCompra}`);
+    return this.proxy.get(`${environment.authCatalogoUrl}/api/compra/${numeroCompra}`);
   }
 }

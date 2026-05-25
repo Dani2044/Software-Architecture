@@ -6,29 +6,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 
-import co.sps.balanceador.config.BalanceadorProperties;
 import co.sps.balanceador.service.LoadBalancerLogic;
 import co.sps.balanceador.service.SrvRegistryInterface;
 import reactor.core.publisher.Mono;
 
 /**
- * Gateway (IP virtual) del sistema SPS.
+ * IP virtual (load balancer) del sistema SPS para las peticiones de compra.
  *
- * <p>Actua como equivalente a un NGINX reverse-proxy construido en Spring WebFlux.
- * Recibe TODAS las peticiones bajo {@code /api/**} y las enruta al microservicio
- * correspondiente segun el prefijo del path:</p>
- * <ul>
- *   <li>{@code /api/compra/**}   — round-robin hacia las replicas de MS-Compra.</li>
- *   <li>{@code /api/auth/**}     — forward directo a MS-Auth-Catalogo.</li>
- *   <li>{@code /api/catalogo/**} — forward directo a MS-Auth-Catalogo.</li>
- * </ul>
+ * <p>Construido en Spring WebFlux, distribuye las solicitudes que llegan
+ * bajo {@code /api/compra/**} entre las replicas activas de MS-Compra
+ * mediante round-robin (ver {@link LoadBalancerLogic}).</p>
  *
- * <p>Esto alinea el sistema con el diagrama de despliegue UML donde el Balanceador
- * es el unico punto de entrada (gateway) y las SPAs nunca contactan directamente
- * a los microservicios backend.</p>
+ * <p><b>Importante:</b> este componente <i>no</i> es un gateway general del
+ * sistema. Es invocado por {@code ProxyCatalogo} del microservicio
+ * MS-Auth-Catalogo, no directamente por las SPAs. Tal como muestra el
+ * diagrama de despliegue UML, el flujo de compra es:</p>
+ * <pre>
+ *   SPS-SPA (ProxyWeb) -> MS-Auth-Catalogo (ProxyCatalogo) -> Balanceador (WSIPVirtual) -> MS-Compra
+ * </pre>
+ *
+ * @author SPS Team
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/compra")
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 public class WSIPVirtual {
 
@@ -36,34 +36,25 @@ public class WSIPVirtual {
 
     private final LoadBalancerLogic lb;
     private final SrvRegistryInterface registry;
-    private final String authCatalogoUrl;
 
-    public WSIPVirtual(LoadBalancerLogic lb,
-                       SrvRegistryInterface registry,
-                       BalanceadorProperties props) {
+    public WSIPVirtual(LoadBalancerLogic lb, SrvRegistryInterface registry) {
         this.lb = lb;
         this.registry = registry;
-        this.authCatalogoUrl = props.getAuthCatalogoUrl();
-        log.info("WSIPVirtual inicializado — auth-catalogo-url: {}", authCatalogoUrl);
     }
 
-    // ─────────────────────────────────────────────
-    //  COMPRA — round-robin a replicas de MS-Compra
-    // ─────────────────────────────────────────────
-
     /**
-     * Endpoint local que NO se reenvia: devuelve el registro de backends activos.
+     * Endpoint local del balanceador (no se reenvia): devuelve el registro
+     * de backends activos. Utilizado para diagnostico/monitoreo.
      */
-    @GetMapping("/compra/registry")
+    @GetMapping("/registry")
     public ResponseEntity<?> getRegistry() {
         return ResponseEntity.ok(registry.getAvailableBackends());
     }
 
     /**
-     * POST /api/compra (sin path adicional) → reenviado tal cual a MS-Compra.
-     * Lo usa el SPA para crear una nueva compra.
+     * POST /api/compra (sin path adicional) -> round-robin a MS-Compra.
      */
-    @PostMapping(value = {"/compra", "/compra/"})
+    @PostMapping(value = {"", "/"})
     public Mono<ResponseEntity<String>> forwardCompraPostRoot(@RequestBody Object body) {
         String fullPath = "/api/compra";
         log.info("WSIPVirtual -> POST {}", fullPath);
@@ -73,9 +64,9 @@ public class WSIPVirtual {
     }
 
     /**
-     * POST /api/compra/** → reenviado preservando el path completo.
+     * POST /api/compra/** -> round-robin a MS-Compra preservando el path completo.
      */
-    @PostMapping("/compra/**")
+    @PostMapping("/**")
     public Mono<ResponseEntity<String>> forwardCompraPost(@RequestBody Object body,
                                                           ServerWebExchange exchange) {
         String fullPath = exchange.getRequest().getPath().value();
@@ -86,9 +77,9 @@ public class WSIPVirtual {
     }
 
     /**
-     * GET /api/compra/** → reenviado preservando el path completo y query string.
+     * GET /api/compra/** -> round-robin a MS-Compra preservando path y query string.
      */
-    @GetMapping("/compra/**")
+    @GetMapping("/**")
     public Mono<ResponseEntity<String>> forwardCompraGet(ServerWebExchange exchange) {
         String fullPath = exchange.getRequest().getPath().value();
         String query = exchange.getRequest().getURI().getRawQuery();
@@ -99,73 +90,5 @@ public class WSIPVirtual {
         return lb.get(fullPath)
                  .map(ResponseEntity::ok)
                  .onErrorReturn(ResponseEntity.status(503).body("{\"error\":\"Servicio no disponible\"}"));
-    }
-
-    // ─────────────────────────────────────────────
-    //  AUTH — forward directo a MS-Auth-Catalogo
-    // ─────────────────────────────────────────────
-
-    /**
-     * POST /api/auth/** → forward directo a MS-Auth-Catalogo.
-     * Se usa para login y registro.
-     */
-    @PostMapping("/auth/**")
-    public Mono<ResponseEntity<String>> forwardAuthPost(@RequestBody Object body,
-                                                        ServerWebExchange exchange) {
-        String fullPath = exchange.getRequest().getPath().value();
-        log.info("WSIPVirtual -> POST {} (auth -> {})", fullPath, authCatalogoUrl);
-        return lb.postDirect(authCatalogoUrl, fullPath, body)
-                 .map(ResponseEntity::ok)
-                 .onErrorReturn(ResponseEntity.status(503).body("{\"error\":\"Auth no disponible\"}"));
-    }
-
-    /**
-     * GET /api/auth/** → forward directo a MS-Auth-Catalogo.
-     */
-    @GetMapping("/auth/**")
-    public Mono<ResponseEntity<String>> forwardAuthGet(ServerWebExchange exchange) {
-        String fullPath = exchange.getRequest().getPath().value();
-        String query = exchange.getRequest().getURI().getRawQuery();
-        if (query != null && !query.isEmpty()) {
-            fullPath = fullPath + "?" + query;
-        }
-        log.info("WSIPVirtual -> GET {} (auth -> {})", fullPath, authCatalogoUrl);
-        return lb.getDirect(authCatalogoUrl, fullPath)
-                 .map(ResponseEntity::ok)
-                 .onErrorReturn(ResponseEntity.status(503).body("{\"error\":\"Auth no disponible\"}"));
-    }
-
-    // ─────────────────────────────────────────────
-    //  CATALOGO — forward directo a MS-Auth-Catalogo
-    // ─────────────────────────────────────────────
-
-    /**
-     * POST /api/catalogo/** → forward directo a MS-Auth-Catalogo.
-     */
-    @PostMapping("/catalogo/**")
-    public Mono<ResponseEntity<String>> forwardCatalogoPost(@RequestBody Object body,
-                                                            ServerWebExchange exchange) {
-        String fullPath = exchange.getRequest().getPath().value();
-        log.info("WSIPVirtual -> POST {} (catalogo -> {})", fullPath, authCatalogoUrl);
-        return lb.postDirect(authCatalogoUrl, fullPath, body)
-                 .map(ResponseEntity::ok)
-                 .onErrorReturn(ResponseEntity.status(503).body("{\"error\":\"Catalogo no disponible\"}"));
-    }
-
-    /**
-     * GET /api/catalogo/** → forward directo a MS-Auth-Catalogo.
-     * Se usa para obtener planes de salud y servicios medicos.
-     */
-    @GetMapping("/catalogo/**")
-    public Mono<ResponseEntity<String>> forwardCatalogoGet(ServerWebExchange exchange) {
-        String fullPath = exchange.getRequest().getPath().value();
-        String query = exchange.getRequest().getURI().getRawQuery();
-        if (query != null && !query.isEmpty()) {
-            fullPath = fullPath + "?" + query;
-        }
-        log.info("WSIPVirtual -> GET {} (catalogo -> {})", fullPath, authCatalogoUrl);
-        return lb.getDirect(authCatalogoUrl, fullPath)
-                 .map(ResponseEntity::ok)
-                 .onErrorReturn(ResponseEntity.status(503).body("{\"error\":\"Catalogo no disponible\"}"));
     }
 }

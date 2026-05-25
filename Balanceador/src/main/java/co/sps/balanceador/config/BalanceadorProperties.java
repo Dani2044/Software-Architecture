@@ -10,14 +10,10 @@ import java.util.List;
 public class BalanceadorProperties {
 
     private List<String> backends;
-    private String authCatalogoUrl;
     private Healthcheck healthcheck = new Healthcheck();
 
     public List<String> getBackends() { return backends; }
     public void setBackends(List<String> backends) { this.backends = backends; }
-
-    public String getAuthCatalogoUrl() { return authCatalogoUrl; }
-    public void setAuthCatalogoUrl(String authCatalogoUrl) { this.authCatalogoUrl = authCatalogoUrl; }
 
     public Healthcheck getHealthcheck() { return healthcheck; }
     public void setHealthcheck(Healthcheck healthcheck) { this.healthcheck = healthcheck; }
