@@ -26,7 +26,11 @@ public class JmsConfig {
         converter.setTypeIdPropertyName("_type");
 
         Map<String, Class<?>> typeIdMappings = new HashMap<>();
+        // Nombre logico moderno
         typeIdMappings.put("CompraTerminadaShc", CompraTerminadaShcDto.class);
+        // Compatibilidad con mensajes viejos que traen el FQN de MS-Compra
+        typeIdMappings.put("com.sps.compra.messaging.CompraTerminadaShcEvento",
+                CompraTerminadaShcDto.class);
         converter.setTypeIdMappings(typeIdMappings);
 
         return converter;
