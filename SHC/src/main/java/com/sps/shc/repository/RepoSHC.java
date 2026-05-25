@@ -1,52 +1,54 @@
 package com.sps.shc.repository;
 
-import com.sps.shc.entity.HistoriaClinica;
+import com.sps.shc.entity.PlanSalud;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 /**
- * Repositorio Spring Data JPA para la entidad {@link HistoriaClinica}.
+ * Repositorio Spring Data JPA para la entidad {@link PlanSalud}.
  *
- * <p>Proporciona operaciones CRUD estándar heredadas de {@link JpaRepository}
- * y consultas derivadas personalizadas para buscar registros de historia clínica
- * por cédula, número de compra, o verificar duplicados.</p>
+ * <p>Proporciona operaciones CRUD estandar heredadas de {@link JpaRepository}
+ * y consultas derivadas personalizadas para buscar planes adquiridos
+ * por cedula del paciente, por numero de compra, o verificar duplicados.</p>
  *
- * <p>El método {@link #existsByNumeroCompraAndCodigoPlan(Long, String)} es clave
- * para la idempotencia del servicio: permite verificar si un plan ya fue registrado
- * para una compra específica antes de insertar un nuevo registro.</p>
+ * <p>El metodo {@link #existsByNumeroCompraAndCodigo(Long, String)} es clave
+ * para la idempotencia del servicio: permite verificar si un plan ya fue
+ * registrado para una compra especifica antes de insertar un nuevo registro.</p>
  *
- * @see com.sps.shc.entity.HistoriaClinica
+ * @author SPS Team
+ * @see PlanSalud
  * @see com.sps.shc.service.SrvSHC
  */
-public interface RepoSHC extends JpaRepository<HistoriaClinica, Long> {
+public interface RepoSHC extends JpaRepository<PlanSalud, Long> {
 
     /**
-     * Verifica si ya existe un registro de historia clínica para la combinación
-     * de número de compra y código de plan dada.
+     * Verifica si ya existe un registro de plan adquirido para la combinacion
+     * de numero de compra y codigo de plan dados.
      *
      * <p>Se utiliza como control de idempotencia para evitar duplicados cuando
-     * un mismo mensaje JMS es procesado más de una vez.</p>
+     * un mismo mensaje JMS es procesado mas de una vez.</p>
      *
-     * @param numeroCompra número de la compra de origen
-     * @param codigoPlan   código del plan de salud
-     * @return {@code true} si ya existe un registro con esa combinación, {@code false} en caso contrario
+     * @param numeroCompra numero de la compra de origen
+     * @param codigo       codigo del plan de salud
+     * @return {@code true} si ya existe un registro con esa combinacion,
+     *         {@code false} en caso contrario
      */
-    boolean existsByNumeroCompraAndCodigoPlan(Long numeroCompra, String codigoPlan);
+    boolean existsByNumeroCompraAndCodigo(Long numeroCompra, String codigo);
 
     /**
-     * Busca todos los registros de historia clínica asociados a una cédula.
+     * Busca todos los planes adquiridos asociados a una cedula de paciente.
      *
-     * @param cedula número de cédula del paciente/comprador
-     * @return lista de historias clínicas del paciente (puede estar vacía)
+     * @param cedulaPaciente numero de cedula del paciente
+     * @return lista de planes adquiridos del paciente (puede estar vacia)
      */
-    List<HistoriaClinica> findByCedula(String cedula);
+    List<PlanSalud> findByCedulaPaciente(String cedulaPaciente);
 
     /**
-     * Busca todos los registros de historia clínica generados a partir de una compra.
+     * Busca todos los planes adquiridos asociados a un numero de compra.
      *
-     * @param numeroCompra número de la compra de origen
-     * @return lista de historias clínicas de la compra (puede estar vacía)
+     * @param numeroCompra numero de la compra de origen
+     * @return lista de planes adquiridos en esa compra (puede estar vacia)
      */
-    List<HistoriaClinica> findByNumeroCompra(Long numeroCompra);
+    List<PlanSalud> findByNumeroCompra(Long numeroCompra);
 }

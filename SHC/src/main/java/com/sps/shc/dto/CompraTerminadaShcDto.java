@@ -21,7 +21,7 @@ import java.util.List;
  * </ul>
  *
  * <p>Por cada combinación de {@code numeroCompra} + {@code plan.codigo} se genera
- * un registro individual de {@link com.sps.shc.entity.HistoriaClinica}.</p>
+ * un registro individual de {@link com.sps.shc.entity.PlanSalud}.</p>
  *
  * @see com.sps.shc.listener.ListenerSHC
  * @see com.sps.shc.service.SrvSHC#registrarCompra(CompraTerminadaShcDto)

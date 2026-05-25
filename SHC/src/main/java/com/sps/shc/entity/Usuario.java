@@ -6,13 +6,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 /**
  * Entidad JPA que representa un paciente/usuario registrado en el sistema SHC.
  *
  * <p>Almacena los datos basicos del paciente necesarios para asociar
- * historias clinicas a una persona identificada por su cedula.</p>
+ * historias clinicas (planes de salud adquiridos) a una persona
+ * identificada por su cedula. La cedula es unica y sirve como
+ * identificador de negocio.</p>
+ *
+ * <p>Los registros de {@code Usuario} se crean automaticamente la primera
+ * vez que llega un evento de compra terminada con una cedula no registrada
+ * previamente (patron find-or-create en {@link com.sps.shc.service.SrvSHC}).</p>
+ *
+ * @author SPS Team
+ * @see com.sps.shc.entity.PlanSalud
+ * @see com.sps.shc.service.SrvSHC
  */
 @Entity
 @Table(name = "usuarios",
@@ -36,7 +44,7 @@ public class Usuario {
     @Column(name = "nombre", nullable = false, length = 200)
     private String nombre;
 
-    /** Fecha de nacimiento del usuario. */
-    @Column(name = "fecha_nacimiento")
-    private LocalDate fechaNacimiento;
+    /** Correo electronico del usuario. */
+    @Column(name = "correo", length = 200)
+    private String correo;
 }
