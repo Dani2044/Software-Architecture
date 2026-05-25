@@ -3,160 +3,146 @@ package com.sps.authcatalogo.catalogo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Controlador REST que actua como proxy/fachada de catalogo y orquestador
- * de compras en el sistema SPS.
+ * Cliente outbound del modulo de catalogo que reenvia las peticiones
+ * de compra al Balanceador del sistema SPS.
  *
- * <p>Alineado con el diagrama de despliegue UML, este componente es el unico
- * punto de entrada que las SPAs (a traves de {@code ProxyWeb}) utilizan para
- * operaciones de catalogo y compra. El flujo de compra es:</p>
+ * <p>Alineado con el diagrama de despliegue UML, esta clase es un
+ * <b>cliente HTTP</b> (no un controller REST). Su unica responsabilidad
+ * es comunicarse con el {@code WSIPVirtual} del Balanceador a traves
+ * de un {@link RestClient}. Es invocado por {@link SrvCatalogo} cuando
+ * se necesita crear o consultar una compra.</p>
+ *
+ * <p>Flujo de compra completo:</p>
  * <pre>
- *   SPS-SPA (ProxyWeb) -> ProxyCatalogo -> WSIPVirtual (Balanceador) -> MS-Compra
+ *   SPS-SPA (ProxyWeb)
+ *        -> WSCatalogo (REST controller en este modulo)
+ *        -> SrvCatalogo (logica de negocio)
+ *        -> ProxyCatalogo (este componente)
+ *        -> WSIPVirtual (Balanceador, otro modulo)
+ *        -> MS-Compra (replicas via round-robin)
  * </pre>
  *
- * <p>Responsabilidades:</p>
- * <ol>
- *   <li><b>Catalogo (local):</b> servir planes y servicios medicos desde la BD
- *       local del modulo, delegando en {@link SrvCatalogo}.</li>
- *   <li><b>Compra (proxy al Balanceador):</b> reenviar las peticiones
- *       {@code /api/compra/**} al {@code WSIPVirtual} del Balanceador,
- *       que aplica round-robin sobre las replicas de MS-Compra.</li>
- * </ol>
- *
+ * @author SPS Team
  * @see SrvCatalogo
  * @see com.sps.authcatalogo.config.WebClientConfig
  */
-@RestController
+@Component
 public class ProxyCatalogo {
 
     private static final Logger log = LoggerFactory.getLogger(ProxyCatalogo.class);
 
-    private final SrvCatalogo srvCatalogo;
     private final RestClient balanceadorRestClient;
 
-    public ProxyCatalogo(SrvCatalogo srvCatalogo,
-                         @Qualifier("balanceadorRestClient") RestClient balanceadorRestClient) {
-        this.srvCatalogo = srvCatalogo;
+    public ProxyCatalogo(@Qualifier("balanceadorRestClient") RestClient balanceadorRestClient) {
         this.balanceadorRestClient = balanceadorRestClient;
     }
 
-    // ─────────────────────────────────────────────
-    //  CATALOGO — endpoints locales (BD MS-Auth-Catalogo)
-    // ─────────────────────────────────────────────
-
     /**
-     * Endpoint de verificacion de salud (health check) del microservicio.
+     * Reenvia un POST de creacion de compra al WSIPVirtual del Balanceador.
+     *
+     * @param body cuerpo de la peticion (datos de la compra)
+     * @return respuesta JSON del Balanceador (numeroCompra, estado, mensaje)
+     * @throws ProxyCatalogoException si el Balanceador no responde o devuelve error
      */
-    @GetMapping("/api/catalogo/health")
-    public Map<String, String> health() {
-        return Map.of("status", "UP", "service", "MS-Auth-Catalogo");
-    }
-
-    /**
-     * Retorna la lista completa de planes de salud disponibles.
-     */
-    @GetMapping("/api/catalogo/planes")
-    public List<PlanSalud> planes() {
-        return srvCatalogo.listarPlanes();
-    }
-
-    /**
-     * Busca y retorna un plan de salud especifico por su codigo de negocio.
-     */
-    @GetMapping("/api/catalogo/planes/{codigo}")
-    public ResponseEntity<PlanSalud> plan(@PathVariable String codigo) {
-        return srvCatalogo.obtenerPlan(codigo)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    /**
-     * Retorna la lista completa de servicios medicos disponibles en el catalogo.
-     */
-    @GetMapping("/api/catalogo/servicios")
-    public List<ServicioMedico> servicios() {
-        return srvCatalogo.listarServicios();
-    }
-
-    // ─────────────────────────────────────────────
-    //  COMPRA — proxy al Balanceador (WSIPVirtual)
-    // ─────────────────────────────────────────────
-
-    /**
-     * Reenvia POST /api/compra al WSIPVirtual del Balanceador.
-     * El Balanceador a su vez aplica round-robin sobre las replicas de MS-Compra.
-     */
-    @PostMapping(value = {"/api/compra", "/api/compra/"})
-    public ResponseEntity<String> forwardCompraPost(@RequestBody Object body) {
+    public String crearCompra(Object body) {
+        log.info("ProxyCatalogo -> Balanceador POST /api/compra");
         return forwardPost("/api/compra", body);
     }
 
     /**
-     * Reenvia POST /api/compra/** al WSIPVirtual del Balanceador.
+     * Reenvia un POST con sub-path arbitrario al WSIPVirtual del Balanceador.
+     *
+     * @param subPath  sub-path adicional bajo /api/compra (ej. "/123/cancelar")
+     * @param body     cuerpo de la peticion
+     * @return respuesta JSON del Balanceador
      */
-    @PostMapping("/api/compra/**")
-    public ResponseEntity<String> forwardCompraPostSubpath(@RequestBody Object body,
-                                                           HttpServletRequest request) {
-        return forwardPost(request.getRequestURI(), body);
+    public String crearCompraSubpath(String subPath, Object body) {
+        String path = "/api/compra" + (subPath.startsWith("/") ? subPath : "/" + subPath);
+        log.info("ProxyCatalogo -> Balanceador POST {}", path);
+        return forwardPost(path, body);
     }
 
     /**
-     * Reenvia GET /api/compra/** al WSIPVirtual del Balanceador.
-     * Usado por el SPA para el polling de estado de la compra.
+     * Consulta el estado de una compra existente al WSIPVirtual del Balanceador.
+     *
+     * @param numeroCompra identificador unico de la compra
+     * @return respuesta JSON del Balanceador con el estado actual
      */
-    @GetMapping("/api/compra/**")
-    public ResponseEntity<String> forwardCompraGet(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        String query = request.getQueryString();
-        String fullPath = (query != null && !query.isBlank()) ? path + "?" + query : path;
+    public String consultarEstado(long numeroCompra) {
+        String path = "/api/compra/" + numeroCompra;
+        log.info("ProxyCatalogo -> Balanceador GET {}", path);
+        return forwardGet(path);
+    }
+
+    /**
+     * Reenvia un GET arbitrario al WSIPVirtual del Balanceador.
+     *
+     * @param fullPath path completo (con query string si aplica) bajo /api/compra
+     * @return respuesta del Balanceador
+     */
+    public String consultarSubpath(String fullPath) {
+        log.info("ProxyCatalogo -> Balanceador GET {}", fullPath);
         return forwardGet(fullPath);
     }
 
-    // ─────────────────────────────────────────────
-    //  Helpers de reenvio
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────────
 
-    private ResponseEntity<String> forwardPost(String path, Object body) {
-        log.info("ProxyCatalogo -> Balanceador POST {}", path);
+    private String forwardPost(String path, Object body) {
         try {
-            String response = balanceadorRestClient.post()
+            return balanceadorRestClient.post()
                     .uri(path)
                     .body(body)
                     .retrieve()
                     .body(String.class);
-            return ResponseEntity.ok(response);
         } catch (RestClientResponseException ex) {
             log.warn("Balanceador respondio {}: {}", ex.getStatusCode(), ex.getMessage());
-            return ResponseEntity.status(ex.getStatusCode()).body(ex.getResponseBodyAsString());
+            throw new ProxyCatalogoException(ex.getStatusCode().value(),
+                    ex.getResponseBodyAsString());
         } catch (Exception ex) {
-            log.error("Error reenviando al Balanceador: {}", ex.getMessage());
-            return ResponseEntity.status(503).body("{\"error\":\"Balanceador no disponible\"}");
+            log.error("Error reenviando POST al Balanceador: {}", ex.getMessage());
+            throw new ProxyCatalogoException(503, "{\"error\":\"Balanceador no disponible\"}");
         }
     }
 
-    private ResponseEntity<String> forwardGet(String path) {
-        log.info("ProxyCatalogo -> Balanceador GET {}", path);
+    private String forwardGet(String path) {
         try {
-            String response = balanceadorRestClient.get()
+            return balanceadorRestClient.get()
                     .uri(path)
                     .retrieve()
                     .body(String.class);
-            return ResponseEntity.ok(response);
         } catch (RestClientResponseException ex) {
             log.warn("Balanceador respondio {}: {}", ex.getStatusCode(), ex.getMessage());
-            return ResponseEntity.status(ex.getStatusCode()).body(ex.getResponseBodyAsString());
+            throw new ProxyCatalogoException(ex.getStatusCode().value(),
+                    ex.getResponseBodyAsString());
         } catch (Exception ex) {
-            log.error("Error reenviando al Balanceador: {}", ex.getMessage());
-            return ResponseEntity.status(503).body("{\"error\":\"Balanceador no disponible\"}");
+            log.error("Error reenviando GET al Balanceador: {}", ex.getMessage());
+            throw new ProxyCatalogoException(503, "{\"error\":\"Balanceador no disponible\"}");
         }
+    }
+
+    /**
+     * Excepcion que encapsula el codigo HTTP y el body de error retornado
+     * por el Balanceador. {@link SrvCatalogo} o el controller la pueden
+     * propagar al cliente HTTP original.
+     */
+    public static class ProxyCatalogoException extends RuntimeException {
+        private final int statusCode;
+        private final String body;
+
+        public ProxyCatalogoException(int statusCode, String body) {
+            super("Balanceador HTTP " + statusCode);
+            this.statusCode = statusCode;
+            this.body = body;
+        }
+
+        public int getStatusCode() { return statusCode; }
+        public String getBody() { return body; }
     }
 }

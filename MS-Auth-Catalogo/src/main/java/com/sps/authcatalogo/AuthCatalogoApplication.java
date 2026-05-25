@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * </ul>
  *
  * @see com.sps.authcatalogo.auth.AuthController
+ * @see com.sps.authcatalogo.catalogo.WSCatalogo
  * @see com.sps.authcatalogo.catalogo.ProxyCatalogo
  */
 @SpringBootApplication
