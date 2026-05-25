@@ -3,8 +3,9 @@ package co.sps.sns.config;
 import co.sps.sns.entity.Empresa;
 import co.sps.sns.entity.PlanSalud;
 import co.sps.sns.entity.SolicitudAfiliacion;
+import co.sps.sns.repository.RepoEmpresa;
+import co.sps.sns.repository.RepoPlanSalud;
 import co.sps.sns.repository.RepoSNS;
-import jakarta.persistence.EntityManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +26,20 @@ public class DataInitializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
-    private final RepoSNS repository;
-    private final EntityManager entityManager;
+    private final RepoSNS repoAfiliados;
+    private final RepoEmpresa repoEmpresa;
+    private final RepoPlanSalud repoPlanSalud;
 
-    public DataInitializer(RepoSNS repository, EntityManager entityManager) {
-        this.repository = repository;
-        this.entityManager = entityManager;
+    public DataInitializer(RepoSNS repoAfiliados, RepoEmpresa repoEmpresa, RepoPlanSalud repoPlanSalud) {
+        this.repoAfiliados = repoAfiliados;
+        this.repoEmpresa = repoEmpresa;
+        this.repoPlanSalud = repoPlanSalud;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
-        if (repository.count() > 0) return;
+        if (repoAfiliados.count() > 0) return;
 
         // Afiliados aprobados: disponibles para validacion exitosa por MS-Compra
         crearAfiliado("1020304050", "CC", "Ana Torres",    "SURA",      SolicitudAfiliacion.EstadoSolicitud.APROBADA);
@@ -50,14 +53,15 @@ public class DataInitializer implements CommandLineRunner {
         crearAfiliado("6677889900", "CE", "Sofia Vargas",  "SURA",      SolicitudAfiliacion.EstadoSolicitud.RECHAZADA);
 
         // Empresas aseguradoras (EPS) registradas ante la SNS
-        entityManager.persist(new Empresa("800123456-1", "SURA EPS",      "ASEG001"));
-        entityManager.persist(new Empresa("800654321-2", "COMPENSAR EPS", "ASEG002"));
+        repoEmpresa.save(new Empresa("800123456-1", "SURA EPS",      "ASEG001"));
+        repoEmpresa.save(new Empresa("800654321-2", "COMPENSAR EPS", "ASEG002"));
 
         // Planes de salud catalogados por la SNS
-        entityManager.persist(new PlanSalud("PLAN-BASICO",   "Plan Basico de Salud",   "ASEG001"));
-        entityManager.persist(new PlanSalud("PLAN-PREMIUM",  "Plan Premium de Salud",  "ASEG001"));
+        repoPlanSalud.save(new PlanSalud("PLAN-BASICO",   "Plan Basico de Salud",   "ASEG001"));
+        repoPlanSalud.save(new PlanSalud("PLAN-PREMIUM",  "Plan Premium de Salud",  "ASEG001"));
 
-        log.info("DataInitializer: {} afiliados, 2 empresas y 2 planes cargados.", repository.count());
+        log.info("DataInitializer: {} afiliados, {} empresas y {} planes cargados.",
+                repoAfiliados.count(), repoEmpresa.count(), repoPlanSalud.count());
     }
 
     private void crearAfiliado(String documento, String tipo, String nombre,
@@ -68,6 +72,6 @@ public class DataInitializer implements CommandLineRunner {
         s.setNombreAfiliado(nombre);
         s.setEps(eps);
         s.setEstado(estado);
-        repository.save(s);
+        repoAfiliados.save(s);
     }
 }

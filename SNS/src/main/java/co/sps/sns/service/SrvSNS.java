@@ -1,7 +1,10 @@
 package co.sps.sns.service;
 
 import co.sps.sns.dto.ValidacionAfiliado;
+import co.sps.sns.entity.PlanSalud;
 import co.sps.sns.entity.SolicitudAfiliacion;
+import co.sps.sns.repository.RepoEmpresa;
+import co.sps.sns.repository.RepoPlanSalud;
 import co.sps.sns.repository.RepoSNS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +26,8 @@ import java.util.Optional;
  * via WebClient (Spring WebFlux) para validar si un plan puede ser vendido.
  * Las posibles respuestas de validacion son:</p>
  * <ul>
- *   <li><b>APROBADO:</b> El plan existe en el catalogo de la SNS</li>
+ *   <li><b>APROBADO:</b> El plan existe en el catalogo de la SNS y la aseguradora
+ *       esta registrada</li>
  *   <li><b>RECHAZADO:</b> El plan no fue encontrado o la aseguradora no coincide</li>
  *   <li><b>ENPROCESO:</b> El plan esta en revision (simulado para reintentos)</li>
  * </ul>
@@ -36,38 +40,68 @@ public class SrvSNS {
     private static final Logger log = LoggerFactory.getLogger(SrvSNS.class);
 
     private final RepoSNS repository;
+    private final RepoPlanSalud repoPlanSalud;
+    private final RepoEmpresa repoEmpresa;
 
     /**
      * Constructor con inyeccion de dependencias.
      *
-     * @param repository repositorio JPA para acceso a datos de solicitudes de afiliacion
+     * @param repository     repositorio de solicitudes de afiliacion
+     * @param repoPlanSalud  repositorio de planes de salud catalogados
+     * @param repoEmpresa    repositorio de empresas aseguradoras (EPS)
      */
-    public SrvSNS(RepoSNS repository) {
+    public SrvSNS(RepoSNS repository, RepoPlanSalud repoPlanSalud, RepoEmpresa repoEmpresa) {
         this.repository = repository;
+        this.repoPlanSalud = repoPlanSalud;
+        this.repoEmpresa = repoEmpresa;
     }
 
     /**
      * Valida si un plan de salud puede ser vendido por la aseguradora.
      *
-     * <p>Logica de simulacion:</p>
-     * <ul>
-     *   <li>Si {@code codigoPlan} esta vacio o nulo -> RECHAZADO</li>
-     *   <li>Si {@code codigoPlan} empieza con "PLAN-" -> APROBADO</li>
-     *   <li>Si {@code codigoPlan} contiene "PEND" -> ENPROCESO (para probar reintentos)</li>
-     *   <li>Para cualquier otro patron -> RECHAZADO</li>
-     * </ul>
+     * <p>Consulta la tabla {@code planes_salud} para verificar que el plan
+     * existe en el catalogo de la SNS. Si se proporciona un codigo de
+     * aseguradora, tambien verifica que la EPS este registrada y que
+     * el plan pertenezca a esa aseguradora.</p>
      *
-     * @param codigoPlan codigo del plan a validar
-     * @param codigoAseguradora codigo de la aseguradora que solicita (opcional, solo log)
+     * <p>Caso especial para demo: si el codigo contiene "PEND", retorna
+     * ENPROCESO para probar la logica de reintentos del TimerSNS en MS-Compra.</p>
+     *
+     * @param codigoPlan        codigo del plan a validar
+     * @param codigoAseguradora codigo de la aseguradora que solicita (puede ser null)
      * @return uno de los strings APROBADO, RECHAZADO o ENPROCESO
      */
     public String validarPlan(String codigoPlan, String codigoAseguradora) {
         log.info("Validando plan {} para aseguradora {}", codigoPlan, codigoAseguradora);
+
         if (codigoPlan == null || codigoPlan.isBlank()) return "RECHAZADO";
-        String upper = codigoPlan.toUpperCase();
-        if (upper.contains("PEND")) return "ENPROCESO";
-        if (upper.startsWith("PLAN-")) return "APROBADO";
-        return "RECHAZADO";
+
+        // Hook de demo: simular estado ENPROCESO para probar reintentos
+        if (codigoPlan.toUpperCase().contains("PEND")) return "ENPROCESO";
+
+        // Consultar si el plan existe en el catalogo de la SNS
+        Optional<PlanSalud> plan = repoPlanSalud.findByCodigo(codigoPlan);
+        if (plan.isEmpty()) {
+            log.info("Plan {} no encontrado en catalogo SNS", codigoPlan);
+            return "RECHAZADO";
+        }
+
+        // Si se proporciono codigo de aseguradora, verificar que coincida
+        if (codigoAseguradora != null && !codigoAseguradora.isBlank()) {
+            // Verificar que el plan pertenece a esa aseguradora
+            if (!codigoAseguradora.equals(plan.get().getCodigoAseguradora())) {
+                log.info("Plan {} no pertenece a aseguradora {}", codigoPlan, codigoAseguradora);
+                return "RECHAZADO";
+            }
+            // Verificar que la aseguradora esta registrada ante la SNS
+            if (repoEmpresa.findByCodigoAseguradora(codigoAseguradora).isEmpty()) {
+                log.info("Aseguradora {} no registrada ante la SNS", codigoAseguradora);
+                return "RECHAZADO";
+            }
+        }
+
+        log.info("Plan {} APROBADO", codigoPlan);
+        return "APROBADO";
     }
 
     /**
