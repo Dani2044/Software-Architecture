@@ -88,9 +88,9 @@ public class WSSNS {
         if (numeroDocumento != null && !numeroDocumento.isBlank()) {
             ValidacionAfiliado v = snsService.validarAfiliado(numeroDocumento, tipoDocumento);
             return ResponseEntity.ok(Map.of(
-                    "estado", v.afiliado() ? "APROBADO" : "RECHAZADO",
+                    "estado", v.isAfiliado() ? "APROBADO" : "RECHAZADO",
                     "numeroDocumento", numeroDocumento,
-                    "afiliado", v.afiliado()
+                    "afiliado", v.isAfiliado()
             ));
         }
 
