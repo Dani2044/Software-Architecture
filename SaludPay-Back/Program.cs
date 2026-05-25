@@ -20,6 +20,7 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
 builder.Services.AddSingleton<IPagoPublisher, IntegraConfirmacion>();
+builder.Services.AddScoped<IRepoSP, RepoSP>();
 builder.Services.AddScoped<ISrvAuthSP, SrvAuthSP>();
 builder.Services.AddScoped<ISrvPagosSP, SrvPagosSP>();
 
