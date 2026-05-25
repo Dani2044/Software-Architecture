@@ -54,10 +54,15 @@ public class RabbitMQConfiguration {
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
         DefaultClassMapper mapper = new DefaultClassMapper();
         Map<String, Class<?>> idMappings = new HashMap<>();
+        // Nombres logicos
         idMappings.put("CompraTerminadaSam", CompraTerminadaSamEvento.class);
         idMappings.put("CompraTerminadaShc", CompraTerminadaShcEvento.class);
         idMappings.put("TransaccionPago", TransaccionPago.class);
+        // Aliases por FQN (por si SaludPay-Back u otro publisher manda el FQN)
+        idMappings.put("com.sps.compra.messaging.TransaccionPago", TransaccionPago.class);
         mapper.setIdClassMapping(idMappings);
+        // Confiar paquetes propios para resolver FQNs entrantes sin error
+        mapper.setTrustedPackages("com.sps", "java.util", "java.lang");
         converter.setClassMapper(mapper);
         return converter;
     }

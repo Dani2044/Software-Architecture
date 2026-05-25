@@ -17,8 +17,18 @@ import java.util.Map;
  *
  * <p>Declara la cola {@code ColaSAM} como bean durable y configura el
  * {@link Jackson2JsonMessageConverter} con {@link DefaultClassMapper} para
- * mapear el nombre logico {@code CompraTerminadaSam} (enviado por MS-Compra
- * en el header {@code __TypeId__}) a la clase local {@link CompraTerminadaSamDto}.</p>
+ * mapear el {@code __TypeId__} recibido a la clase local {@link CompraTerminadaSamDto}.</p>
+ *
+ * <p>Se aceptan DOS valores de {@code __TypeId__}:</p>
+ * <ul>
+ *   <li>El nombre logico {@code CompraTerminadaSam} (cuando el publisher usa
+ *       el mismo nombre logico configurado en su DefaultClassMapper).</li>
+ *   <li>El FQN {@code com.sps.compra.messaging.CompraTerminadaSamEvento} (cuando
+ *       el publisher no resuelve el nombre logico y manda el class name completo).</li>
+ * </ul>
+ *
+ * <p>Tambien se confian los paquetes {@code com.sps.*} para permitir cualquier
+ * resolucion por FQN sin lanzar {@code IllegalArgumentException}.</p>
  *
  * @see com.sps.sam.listener.ListenerSAM
  */
@@ -35,8 +45,14 @@ public class RabbitMQConfiguration {
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
         DefaultClassMapper mapper = new DefaultClassMapper();
         Map<String, Class<?>> idMappings = new HashMap<>();
+        // Nombre logico (cuando MS-Compra resuelve correctamente el mapping)
         idMappings.put("CompraTerminadaSam", CompraTerminadaSamDto.class);
+        // Fallback por FQN (cuando MS-Compra publica el class name completo)
+        idMappings.put("com.sps.compra.messaging.CompraTerminadaSamEvento",
+                CompraTerminadaSamDto.class);
         mapper.setIdClassMapping(idMappings);
+        // Confiar paquetes de SPS para que loadClass() no rechace FQNs
+        mapper.setTrustedPackages("com.sps", "java.util", "java.lang");
         converter.setClassMapper(mapper);
         return converter;
     }
