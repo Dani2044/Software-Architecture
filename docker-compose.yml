@@ -14,18 +14,20 @@
 services:
 
   # ==========================================================================
-  # PERFIL JUAN (10.43.100.122) - MS-Compra Maestro + Broker ActiveMQ
+  # PERFIL JUAN (10.43.100.122) - MS-Compra Maestro + Broker RabbitMQ
   # ==========================================================================
-  activemq:
-    image: apache/activemq-classic:latest
-    container_name: activemq
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
     profiles: ["juan"]
     environment:
-      ACTIVEMQ_CONNECTION_USER: ${ACTIVEMQ_USER}
-      ACTIVEMQ_CONNECTION_PASSWORD: ${ACTIVEMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     ports:
-      - "61616:61616"   # JMS
-      - "8161:8161"     # Consola web admin
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Consola web management
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
 
   # MySQL compartido entre las 2 replicas de MS-Compra
@@ -53,9 +55,10 @@ services:
       DB_HOST: ${DB_HOST:-mysql-compra}
       DB_PORT: ${DB_PORT:-3306}
       DB_PASS: ${DB_PASS}
-      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
-      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
-      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
       SNS_URL: ${SNS_URL}
       SNS_CODIGO: ${SNS_CODIGO}
       SALUD_PAY_URL: ${SALUD_PAY_URL}
@@ -213,9 +216,10 @@ services:
     environment:
       DB_HOST: mysql-sam
       DB_PASS: ${DB_PASS}
-      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
-      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
-      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     ports:
       - "8086:8086"
     restart: unless-stopped
@@ -229,9 +233,10 @@ services:
     environment:
       DB_HOST: mysql-shc
       DB_PASS: ${DB_PASS}
-      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
-      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
-      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     ports:
       - "8087:8087"
     restart: unless-stopped
@@ -264,9 +269,10 @@ services:
     environment:
       DB_HOST: sqlserver-saludpay
       DB_PASS: ${SQLSERVER_PASS}
-      ACTIVEMQ_URL: ${ACTIVEMQ_URL}
-      ACTIVEMQ_USER: ${ACTIVEMQ_USER}
-      ACTIVEMQ_PASS: ${ACTIVEMQ_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     ports:
       - "5000:5000"
     restart: unless-stopped
@@ -296,3 +302,4 @@ volumes:
   mysql_email_data:
   mysql_balanceador_data:
   sqlserver_data:
+  rabbitmq_data:
