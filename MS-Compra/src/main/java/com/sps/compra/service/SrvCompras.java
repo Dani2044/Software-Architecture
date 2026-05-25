@@ -121,7 +121,8 @@ public class SrvCompras {
         log.info("Compra {} APROBADA por SNS", compra.getId());
 
         srvEmail.enviarCorreoAprobacion(
-                compra.getCorreoCliente(), compra.getId(), compra.getValorTotal());
+                compra.getCorreoCliente(), compra.getNombreCliente(),
+                compra.getId(), compra.getValorTotal());
         srvSaludPay.publicarCompraPendiente(
                 compra.getCedulaCliente(), compra.getId(), compra.getValorTotal());
     }
@@ -152,7 +153,9 @@ public class SrvCompras {
         compra.setEstado(EstadoCompra.TERMINADA);
         repoCompra.save(compra);
 
-        srvEmail.enviarCorreoCompraTerminada(compra.getCorreoCliente(), compra.getId());
+        srvEmail.enviarCorreoCompraTerminada(
+                compra.getCorreoCliente(), compra.getNombreCliente(),
+                compra.getId(), compra.getValorTotal());
         log.info("Compra {} TERMINADA tras pago", compra.getId());
     }
 
