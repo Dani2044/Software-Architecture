@@ -9,5 +9,5 @@ RUN npm run build -- --output-path=dist
 # --- runtime stage: nginx solo sirve los estaticos del bundle Angular ---
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist/browser /usr/share/nginx/html
 EXPOSE 80
