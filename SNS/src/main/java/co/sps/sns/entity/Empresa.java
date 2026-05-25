@@ -1,4 +1,4 @@
-package co.sps.sns.model;
+package co.sps.sns.entity;
 
 import jakarta.persistence.*;
 
@@ -7,6 +7,13 @@ import jakarta.persistence.*;
  *
  * <p>Modela las EPS que estan autorizadas por la Superintendencia Nacional
  * de Salud para ofrecer planes de salud a los afiliados.</p>
+ *
+ * <p>Cuando MS-Compra solicita validar un plan, el servicio
+ * {@link co.sps.sns.service.SrvSNS} puede verificar que la aseguradora
+ * que ofrece el plan esta registrada ante la SNS consultando esta tabla.</p>
+ *
+ * @author SPS Team
+ * @see co.sps.sns.entity.PlanSalud
  */
 @Entity
 @Table(name = "empresas")

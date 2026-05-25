@@ -1,4 +1,4 @@
-package co.sps.sns.model;
+package co.sps.sns.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -17,10 +17,9 @@ import java.time.LocalDateTime;
  * si el usuario tiene una afiliacion activa (APROBADA), rechazada (RECHAZADA)
  * o en proceso (PENDIENTE/EN_REVISION).</p>
  *
- * <p>Persistida en la tabla {@code solicitudes_afiliacion} de la base de datos H2.</p>
+ * <p>Persistida en la tabla {@code solicitudes_afiliacion} de la base de datos.</p>
  *
  * @author SPS Team
- * @version 1.0
  */
 @Entity
 @Table(name = "solicitudes_afiliacion")
@@ -74,71 +73,31 @@ public class SolicitudAfiliacion {
      */
     @PrePersist
     protected void onCreate() {
-        // Se registra la fecha/hora actual como momento de creacion
         fechaCreacion = LocalDateTime.now();
-        // Si no se especifico un estado, se asigna PENDIENTE por defecto
         if (estado == null) estado = EstadoSolicitud.PENDIENTE;
     }
 
     /**
      * Enumeracion que define los posibles estados de una solicitud de afiliacion.
-     *
-     * <ul>
-     *   <li><b>PENDIENTE:</b> Solicitud recibida, aun sin procesar (equivale a ENPROCESO para MS-Compra)</li>
-     *   <li><b>APROBADA:</b> Afiliacion validada y activa (equivale a APROBADO para MS-Compra)</li>
-     *   <li><b>RECHAZADA:</b> Afiliacion rechazada por el sistema (equivale a RECHAZADO para MS-Compra)</li>
-     *   <li><b>EN_REVISION:</b> Solicitud en revision manual por un funcionario</li>
-     * </ul>
      */
     public enum EstadoSolicitud {
         PENDIENTE, APROBADA, RECHAZADA, EN_REVISION
     }
 
-    /** @return el identificador unico de la solicitud */
     public Long getId() { return id; }
-
-    /** @return el numero de documento del afiliado */
     public String getNumeroDocumento() { return numeroDocumento; }
-
-    /** @param numeroDocumento numero de documento a asignar */
     public void setNumeroDocumento(String numeroDocumento) { this.numeroDocumento = numeroDocumento; }
-
-    /** @return el tipo de documento (CC, TI, CE) */
     public String getTipoDocumento() { return tipoDocumento; }
-
-    /** @param tipoDocumento tipo de documento a asignar */
     public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
-
-    /** @return el nombre completo del afiliado */
     public String getNombreAfiliado() { return nombreAfiliado; }
-
-    /** @param nombreAfiliado nombre del afiliado a asignar */
     public void setNombreAfiliado(String nombreAfiliado) { this.nombreAfiliado = nombreAfiliado; }
-
-    /** @return el nombre de la EPS */
     public String getEps() { return eps; }
-
-    /** @param eps nombre de la EPS a asignar */
     public void setEps(String eps) { this.eps = eps; }
-
-    /** @return el estado actual de la solicitud */
     public EstadoSolicitud getEstado() { return estado; }
-
-    /** @param estado nuevo estado de la solicitud */
     public void setEstado(EstadoSolicitud estado) { this.estado = estado; }
-
-    /** @return la fecha y hora de creacion de la solicitud */
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-
-    /** @return la fecha y hora de la respuesta, o {@code null} si aun no se ha respondido */
     public LocalDateTime getFechaRespuesta() { return fechaRespuesta; }
-
-    /** @param fechaRespuesta fecha y hora de la respuesta a asignar */
     public void setFechaRespuesta(LocalDateTime fechaRespuesta) { this.fechaRespuesta = fechaRespuesta; }
-
-    /** @return las observaciones asociadas a la solicitud */
     public String getObservaciones() { return observaciones; }
-
-    /** @param observaciones observaciones o comentarios a asignar */
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 }

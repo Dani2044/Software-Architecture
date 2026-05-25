@@ -1,8 +1,8 @@
 package co.sps.sns.service;
 
-import co.sps.sns.model.SolicitudAfiliacion;
-import co.sps.sns.model.RepoSNS;
-import co.sps.sns.model.ValidacionAfiliado;
+import co.sps.sns.dto.ValidacionAfiliado;
+import co.sps.sns.entity.SolicitudAfiliacion;
+import co.sps.sns.repository.RepoSNS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,22 +14,21 @@ import java.util.Optional;
 /**
  * Servicio de logica de negocio del simulador SNS (Superintendencia Nacional de Salud).
  *
- * <p>Contiene la logica central para validar afiliaciones al sistema de salud,
+ * <p>Contiene la logica central para validar planes de salud, validar afiliaciones,
  * registrar nuevas solicitudes, consultarlas y actualizar su estado. Este servicio
  * es invocado por {@link co.sps.sns.controller.WSSNS}.</p>
  *
  * <p><b>Rol en la arquitectura:</b> Capa de servicio que implementa las reglas
  * de negocio del simulador SNS. MS-Compra consume este servicio de forma asincrona
- * via WebClient (no via MOM/colas) para validar si un usuario puede adquirir un
- * plan de salud. Las posibles respuestas de validacion son:</p>
+ * via WebClient (Spring WebFlux) para validar si un plan puede ser vendido.
+ * Las posibles respuestas de validacion son:</p>
  * <ul>
- *   <li><b>APROBADO:</b> El afiliado tiene estado APROBADA en la base de datos</li>
- *   <li><b>RECHAZADO:</b> El afiliado no fue encontrado o no tiene afiliacion activa</li>
- *   <li><b>ENPROCESO:</b> Representado por solicitudes en estado PENDIENTE o EN_REVISION</li>
+ *   <li><b>APROBADO:</b> El plan existe en el catalogo de la SNS</li>
+ *   <li><b>RECHAZADO:</b> El plan no fue encontrado o la aseguradora no coincide</li>
+ *   <li><b>ENPROCESO:</b> El plan esta en revision (simulado para reintentos)</li>
  * </ul>
  *
  * @author SPS Team
- * @version 1.0
  */
 @Service
 public class SrvSNS {
@@ -48,32 +47,14 @@ public class SrvSNS {
     }
 
     /**
-     * Valida si un afiliado tiene un plan de salud activo en el sistema.
-     *
-     * <p>Este es el metodo principal del servicio, invocado cuando MS-Compra
-     * realiza una llamada asincrona via WebClient al endpoint de validacion.
-     * La logica de validacion es la siguiente:</p>
-     * <ol>
-     *   <li>Busca al afiliado por numero de documento en la base de datos</li>
-     *   <li>Si existe y su estado es APROBADA, retorna una validacion positiva
-     *       con los datos del afiliado (equivalente a APROBADO)</li>
-     *   <li>Si no existe o su estado es diferente a APROBADA, retorna una
-     *       validacion negativa (equivalente a RECHAZADO)</li>
-     * </ol>
-     *
-     * @param numeroDocumento numero de documento del afiliado a validar
-     * @param tipoDocumento   tipo de documento (CC, TI, CE)
-     * @return objeto {@link ValidacionAfiliado} con el resultado de la validacion
-     */
-    /**
      * Valida si un plan de salud puede ser vendido por la aseguradora.
      *
      * <p>Logica de simulacion:</p>
      * <ul>
-     *   <li>Si {@code codigoPlan} esta vacio o nulo → RECHAZADO</li>
-     *   <li>Si {@code codigoPlan} empieza con "PLAN-" → APROBADO</li>
-     *   <li>Si {@code codigoPlan} contiene "PEND" → ENPROCESO (para probar reintentos)</li>
-     *   <li>Para cualquier otro patron → RECHAZADO</li>
+     *   <li>Si {@code codigoPlan} esta vacio o nulo -> RECHAZADO</li>
+     *   <li>Si {@code codigoPlan} empieza con "PLAN-" -> APROBADO</li>
+     *   <li>Si {@code codigoPlan} contiene "PEND" -> ENPROCESO (para probar reintentos)</li>
+     *   <li>Para cualquier otro patron -> RECHAZADO</li>
      * </ul>
      *
      * @param codigoPlan codigo del plan a validar
@@ -89,22 +70,25 @@ public class SrvSNS {
         return "RECHAZADO";
     }
 
+    /**
+     * Valida si un afiliado tiene un plan de salud activo en el sistema.
+     *
+     * @param numeroDocumento numero de documento del afiliado a validar
+     * @param tipoDocumento   tipo de documento (CC, TI, CE)
+     * @return objeto {@link ValidacionAfiliado} con el resultado de la validacion
+     */
     public ValidacionAfiliado validarAfiliado(String numeroDocumento, String tipoDocumento) {
         log.info("Validando afiliado: {} - {}", tipoDocumento, numeroDocumento);
 
-        // Busca la solicitud de afiliacion por numero de documento
         Optional<SolicitudAfiliacion> solicitud = repository.findByNumeroDocumento(numeroDocumento);
 
-        // Verifica que exista el registro Y que su estado sea APROBADA (afiliacion activa)
         if (solicitud.isPresent() && solicitud.get().getEstado() == SolicitudAfiliacion.EstadoSolicitud.APROBADA) {
             SolicitudAfiliacion s = solicitud.get();
-            // Retorna validacion positiva con datos del afiliado y regimen CONTRIBUTIVO
             return new ValidacionAfiliado(true, s.getNumeroDocumento(),
                     s.getNombreAfiliado(), s.getEps(), "CONTRIBUTIVO",
                     "Afiliado activo en el sistema de salud");
         }
 
-        // Si no se encontro o el estado no es APROBADA, se retorna validacion negativa
         return new ValidacionAfiliado(false, numeroDocumento, null, null, null,
                 "No se encontro afiliacion activa para el documento");
     }
@@ -112,16 +96,11 @@ public class SrvSNS {
     /**
      * Registra una nueva solicitud de afiliacion al sistema de salud.
      *
-     * <p>La solicitud se crea siempre con estado PENDIENTE, independientemente
-     * del estado que se envie en el cuerpo de la peticion. La fecha de creacion
-     * se asigna automaticamente via el callback {@code @PrePersist} de la entidad.</p>
-     *
      * @param solicitud datos de la solicitud de afiliacion a registrar
      * @return la solicitud persistida con su ID asignado y estado PENDIENTE
      */
     public SolicitudAfiliacion registrarSolicitud(SolicitudAfiliacion solicitud) {
         log.info("Registrando solicitud de afiliacion para: {}", solicitud.getNumeroDocumento());
-        // Se fuerza el estado a PENDIENTE para toda nueva solicitud
         solicitud.setEstado(SolicitudAfiliacion.EstadoSolicitud.PENDIENTE);
         return repository.save(solicitud);
     }
@@ -149,22 +128,16 @@ public class SrvSNS {
     /**
      * Actualiza el estado de una solicitud de afiliacion existente.
      *
-     * <p>Busca la solicitud por ID, actualiza su estado, registra la fecha
-     * de respuesta y agrega las observaciones proporcionadas. Si la solicitud
-     * no existe, lanza una excepcion {@link IllegalArgumentException}.</p>
-     *
      * @param id             identificador de la solicitud a actualizar
-     * @param nuevoEstado    nuevo estado a asignar (APROBADA, RECHAZADA, EN_REVISION, etc.)
+     * @param nuevoEstado    nuevo estado a asignar
      * @param observaciones  comentarios sobre la decision tomada
      * @return la solicitud actualizada y persistida
      * @throws IllegalArgumentException si no existe una solicitud con el ID proporcionado
      */
     public SolicitudAfiliacion actualizarEstado(Long id, SolicitudAfiliacion.EstadoSolicitud nuevoEstado, String observaciones) {
-        // Busca la solicitud o lanza excepcion si no existe
         SolicitudAfiliacion solicitud = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada: " + id));
 
-        // Actualiza el estado, la fecha de respuesta y las observaciones
         solicitud.setEstado(nuevoEstado);
         solicitud.setFechaRespuesta(LocalDateTime.now());
         solicitud.setObservaciones(observaciones);
