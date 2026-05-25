@@ -1,6 +1,6 @@
 package com.sps.sam.controller;
 
-import com.sps.sam.entity.AgendaServicio;
+import com.sps.sam.entity.ServicioMedico;
 import com.sps.sam.repository.RepoSAM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -56,11 +56,11 @@ public class WSSAM {
      * identificado por su cedula.
      *
      * @param cedula cedula de identidad del paciente
-     * @return lista de entidades {@link AgendaServicio} asociadas a esa cedula;
+     * @return lista de entidades {@link ServicioMedico} asociadas a esa cedula;
      *         lista vacia si el paciente no tiene servicios agendados
      */
     @GetMapping("/agenda/{cedula}")
-    public List<AgendaServicio> porCedula(@PathVariable String cedula) {
+    public List<ServicioMedico> porCedula(@PathVariable String cedula) {
         return repository.findByCedulaCliente(cedula);
     }
 
@@ -69,11 +69,11 @@ public class WSSAM {
      * un numero de compra especifico.
      *
      * @param numeroCompra numero unico de la compra en el sistema SPS
-     * @return lista de entidades {@link AgendaServicio} asociadas a esa compra;
+     * @return lista de entidades {@link ServicioMedico} asociadas a esa compra;
      *         lista vacia si la compra no tiene servicios registrados
      */
     @GetMapping("/agenda/compra/{numeroCompra}")
-    public List<AgendaServicio> porCompra(@PathVariable Long numeroCompra) {
+    public List<ServicioMedico> porCompra(@PathVariable Long numeroCompra) {
         return repository.findByNumeroCompra(numeroCompra);
     }
 }

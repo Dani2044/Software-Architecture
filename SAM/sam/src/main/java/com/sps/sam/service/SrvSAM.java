@@ -1,7 +1,7 @@
 package com.sps.sam.service;
 
 import com.sps.sam.dto.CompraTerminadaSamDto;
-import com.sps.sam.entity.AgendaServicio;
+import com.sps.sam.entity.ServicioMedico;
 import com.sps.sam.repository.RepoSAM;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author SPS Team
  * @see com.sps.sam.listener.ListenerSAM
- * @see com.sps.sam.entity.AgendaServicio
+ * @see com.sps.sam.entity.ServicioMedico
  */
 @Service
 @RequiredArgsConstructor
@@ -65,7 +65,7 @@ public class SrvSAM {
                 return; // Continua con el siguiente servicio (no sale del forEach)
             }
             // Construye y persiste la entidad con los datos del servicio
-            repository.save(AgendaServicio.builder()
+            repository.save(ServicioMedico.builder()
                     .numeroCompra(evento.getNumeroCompra())
                     .cedulaCliente(evento.getCedulaCliente())
                     .codigoServicio(s.getCodigo())

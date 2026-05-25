@@ -1,12 +1,12 @@
 package com.sps.sam.repository;
 
-import com.sps.sam.entity.AgendaServicio;
+import com.sps.sam.entity.ServicioMedico;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 /**
- * Repositorio Spring Data JPA para la entidad {@link AgendaServicio}.
+ * Repositorio Spring Data JPA para la entidad {@link ServicioMedico}.
  *
  * <p>Proporciona operaciones CRUD estandar heredadas de {@link JpaRepository}
  * y consultas derivadas adicionales para las necesidades especificas de SAM:</p>
@@ -17,9 +17,9 @@ import java.util.List;
  * </ul>
  *
  * @author SPS Team
- * @see AgendaServicio
+ * @see ServicioMedico
  */
-public interface RepoSAM extends JpaRepository<AgendaServicio, Long> {
+public interface RepoSAM extends JpaRepository<ServicioMedico, Long> {
 
     /**
      * Verifica si ya existe un registro con la combinacion de numero de compra
@@ -43,7 +43,7 @@ public interface RepoSAM extends JpaRepository<AgendaServicio, Long> {
      * @param cedulaCliente cedula de identidad del paciente
      * @return lista de servicios agendados; vacia si no hay registros
      */
-    List<AgendaServicio> findByCedulaCliente(String cedulaCliente);
+    List<ServicioMedico> findByCedulaCliente(String cedulaCliente);
 
     /**
      * Obtiene todos los servicios agendados asociados a un numero de compra
@@ -52,5 +52,5 @@ public interface RepoSAM extends JpaRepository<AgendaServicio, Long> {
      * @param numeroCompra numero unico de la compra
      * @return lista de servicios agendados para esa compra; vacia si no hay registros
      */
-    List<AgendaServicio> findByNumeroCompra(Long numeroCompra);
+    List<ServicioMedico> findByNumeroCompra(Long numeroCompra);
 }
