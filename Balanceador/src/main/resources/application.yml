@@ -26,11 +26,6 @@ balanceador:
   healthcheck:
     interval-ms: 15000
 
-sns:
-  base-url: http://10.43.101.18:8090
-  timeout-ms: 5000
-  max-retries: 3
-
 management:
   endpoints:
     web:
