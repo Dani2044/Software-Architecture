@@ -41,7 +41,7 @@ public class PlanSalud {
     @Column(length = 32)
     private ValidacionSNS estadoSns;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "compra_plan_servicio", joinColumns = @JoinColumn(name = "compra_plan_id"))
     @Builder.Default
     private List<ServicioMedico> servicios = new ArrayList<>();

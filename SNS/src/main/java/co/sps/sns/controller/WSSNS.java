@@ -56,13 +56,48 @@ public class WSSNS {
      * @return respuesta HTTP 200 con el resultado de la validacion
      *         ({@link ValidacionAfiliado})
      */
+    /**
+     * Endpoint principal segun enunciado SPS: valida si un plan esta autorizado
+     * a ser vendido por la aseguradora consultada.
+     *
+     * Acepta dos modos de invocacion (multiplexados para compatibilidad):
+     *  - Por codigo de plan + codigo de aseguradora (uso real desde MS-Compra)
+     *  - Por documento del afiliado (uso legacy/diagnostico)
+     *
+     * Responde con {@code {"estado": "APROBADO|RECHAZADO|ENPROCESO", ...}}
+     * tal como lo consume {@link WebClientSNS} en MS-Compra.
+     */
     @GetMapping("/validar")
-    public ResponseEntity<ValidacionAfiliado> validarAfiliado(
-            @RequestParam String numeroDocumento,
+    public ResponseEntity<Map<String, Object>> validar(
+            @RequestParam(required = false) String codigoPlan,
+            @RequestParam(required = false) String codigoAseguradora,
+            @RequestParam(required = false) String numeroDocumento,
             @RequestParam(defaultValue = "CC") String tipoDocumento) {
 
-        ValidacionAfiliado resultado = snsService.validarAfiliado(numeroDocumento, tipoDocumento);
-        return ResponseEntity.ok(resultado);
+        // Modo 1: validacion por plan (el flujo principal del enunciado)
+        if (codigoPlan != null && !codigoPlan.isBlank()) {
+            String estado = snsService.validarPlan(codigoPlan, codigoAseguradora);
+            return ResponseEntity.ok(Map.of(
+                    "codigoPlan", codigoPlan,
+                    "codigoAseguradora", codigoAseguradora != null ? codigoAseguradora : "",
+                    "estado", estado
+            ));
+        }
+
+        // Modo 2: validacion legacy por documento (mantener compatibilidad)
+        if (numeroDocumento != null && !numeroDocumento.isBlank()) {
+            ValidacionAfiliado v = snsService.validarAfiliado(numeroDocumento, tipoDocumento);
+            return ResponseEntity.ok(Map.of(
+                    "estado", v.afiliado() ? "APROBADO" : "RECHAZADO",
+                    "numeroDocumento", numeroDocumento,
+                    "afiliado", v.afiliado()
+            ));
+        }
+
+        // Sin parametros: 400
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "Debe enviar codigoPlan o numeroDocumento"
+        ));
     }
 
     /**

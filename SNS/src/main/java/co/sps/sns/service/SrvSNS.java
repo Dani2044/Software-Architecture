@@ -65,6 +65,30 @@ public class SrvSNS {
      * @param tipoDocumento   tipo de documento (CC, TI, CE)
      * @return objeto {@link ValidacionAfiliado} con el resultado de la validacion
      */
+    /**
+     * Valida si un plan de salud puede ser vendido por la aseguradora.
+     *
+     * <p>Logica de simulacion:</p>
+     * <ul>
+     *   <li>Si {@code codigoPlan} esta vacio o nulo → RECHAZADO</li>
+     *   <li>Si {@code codigoPlan} empieza con "PLAN-" → APROBADO</li>
+     *   <li>Si {@code codigoPlan} contiene "PEND" → ENPROCESO (para probar reintentos)</li>
+     *   <li>Para cualquier otro patron → RECHAZADO</li>
+     * </ul>
+     *
+     * @param codigoPlan codigo del plan a validar
+     * @param codigoAseguradora codigo de la aseguradora que solicita (opcional, solo log)
+     * @return uno de los strings APROBADO, RECHAZADO o ENPROCESO
+     */
+    public String validarPlan(String codigoPlan, String codigoAseguradora) {
+        log.info("Validando plan {} para aseguradora {}", codigoPlan, codigoAseguradora);
+        if (codigoPlan == null || codigoPlan.isBlank()) return "RECHAZADO";
+        String upper = codigoPlan.toUpperCase();
+        if (upper.contains("PEND")) return "ENPROCESO";
+        if (upper.startsWith("PLAN-")) return "APROBADO";
+        return "RECHAZADO";
+    }
+
     public ValidacionAfiliado validarAfiliado(String numeroDocumento, String tipoDocumento) {
         log.info("Validando afiliado: {} - {}", tipoDocumento, numeroDocumento);
 
