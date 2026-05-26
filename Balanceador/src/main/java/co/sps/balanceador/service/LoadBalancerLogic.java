@@ -59,8 +59,10 @@ public class LoadBalancerLogic {
         })
         .retryWhen(
             Retry.max(props.getBackends().size() - 1)
-                 .filter(ex -> ex instanceof WebClientResponseException
-                         || ex instanceof java.util.concurrent.TimeoutException)
+                 // Reintenta ante CUALQUIER error: connection refused, timeout, 5xx, etc.
+                 // El Mono.defer() de arriba garantiza que cada reintento llama a
+                 // nextBackend() de nuevo, asi probamos otra replica.
+                 .filter(ex -> true)
                  .doBeforeRetry(sig -> {
                      log.warn("Reintentando tras error: {}", sig.failure().getMessage());
                      logService.registrar("RETRY", "GET", "N/A", path,
@@ -91,8 +93,10 @@ public class LoadBalancerLogic {
         })
         .retryWhen(
             Retry.max(props.getBackends().size() - 1)
-                 .filter(ex -> ex instanceof WebClientResponseException
-                         || ex instanceof java.util.concurrent.TimeoutException)
+                 // Reintenta ante CUALQUIER error: connection refused, timeout, 5xx, etc.
+                 // El Mono.defer() de arriba garantiza que cada reintento llama a
+                 // nextBackend() de nuevo, asi probamos otra replica.
+                 .filter(ex -> true)
                  .doBeforeRetry(sig -> {
                      log.warn("Reintentando tras error: {}", sig.failure().getMessage());
                      logService.registrar("RETRY", "POST", "N/A", path,
