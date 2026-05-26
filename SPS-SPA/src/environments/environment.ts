@@ -23,9 +23,14 @@ export const environment = {
   authCatalogoUrl: 'http://10.43.101.18:8082',
 
   /**
-   * URL del SaludPay-SPA (puerto 4201) — pantalla de pago.
+   * URL del SaludPay-SPA (puerto 4201) — pantalla de login.
    * Se usa como destino del boton "Ir a pagar en SaludPay" que aparece
    * en EsperandoComponent cuando la compra es APROBADA por la SNS.
+   *
+   * <p>Apunta a {@code /login} para que el usuario se autentique con sus
+   * credenciales de SaludPay antes de acceder a la pantalla de pago.
+   * Tras el login exitoso, el SaludPay-SPA redirige automaticamente a
+   * {@code /pago}.</p>
    */
-  saludPayUrl: 'http://10.43.100.111:4201/pago'
+  saludPayUrl: 'http://10.43.100.111:4201/login'
 };
